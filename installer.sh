@@ -71,6 +71,10 @@ cat << "EOF" > /opt/userify/shim.sh
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
 output=$(curl -k https://shim.userify.com/shim.py | $PYTHON 2>&1)
 echo "$output" |tee /var/log/shim.log
+
+# fix for thundering herd
+sleep $(( ( RANDOM % 5 )  + 1 ))
+
 /opt/userify/shim.sh &
 
 EOF

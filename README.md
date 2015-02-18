@@ -30,7 +30,7 @@ and derivatives. Need FreeBSD or other UNIX? Get in touch with specific
 needs.
 
 
-Tested distributions: RHEL6, CentOS6, Debian 7 (wheezy) and later,
+Tested distributions: RHEL7, CentOS7, Debian 7 (wheezy) and later,
 Ubuntu 12.04 and later.  (Please notify with testing results.)
 
 

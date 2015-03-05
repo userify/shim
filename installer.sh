@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Userify Shim Installer
-# Copyright (c) 2011-2014 Userify
+# Copyright (c) 2011-2015 Userify Corporation
 
 
 if [ "$(id -u)" != "0" ]; then

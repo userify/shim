@@ -19,7 +19,7 @@ fi
 
 # on older apt-get systems, attempt to install sudo
 set +e
-apt-get update 2>/dev/null; apt-get -y install sudo 2>/dev/null
+apt-get update >/dev/null; apt-get -y install sudo >/dev/null
 set -e
 
 echo "Installing Userify and halting on errors."

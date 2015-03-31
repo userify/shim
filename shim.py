@@ -61,6 +61,8 @@ def useradd(name, username, preferred_shell):
         "--user-group", username]
     subprocess.call([i for i in cmd if i])
     parse_passwd()
+    fullchown(username, home_dir)
+
 
 def sudoers_add(username, perm=""):
     fname = "/etc/sudoers.d/" + username

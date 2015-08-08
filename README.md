@@ -26,12 +26,14 @@ and only requires:
 
 These basics are *built-in* to most Linux distributions made in the last five years,
 including Red Hat, Debian, Ubuntu, RHEL, CentOS, SUSE, Gentoo,
-and derivatives. Need FreeBSD or other UNIX? Get in touch with specific
-needs.
+and derivatives.
 
 
 Tested distributions: RHEL7, CentOS7, Debian 7 (wheezy) and later,
 Ubuntu 12.04 and later.  (Please notify with testing results.)
+
+Currently no BSD-based UNIX (incl OS X) is supported.
+
 
 
 What does the installer do?

@@ -60,8 +60,8 @@ def useradd(name, username, preferred_shell):
         "-s", preferred_shell if preferred_shell else "/bin/bash",
         "--user-group", username]
     subprocess.call([i for i in cmd if i])
-    parse_passwd()
     fullchown(username, home_dir)
+    parse_passwd()
 
 
 def sudoers_add(username, perm=""):

@@ -45,8 +45,8 @@ sed -i "s/\/opt\/userify\/shim.sh \&//" \
 # # Fedora:
 # systemctl disable userify-shim.service 2>/dev/null
 # rm -f /etc/systemd/system/userify-shim.service 2>/dev/null
-# rm -Rf /opt/userify/
-# killall shim.py shim.sh
+rm -Rf /opt/userify/
+killall shim.py shim.sh
 EOF
 
 
@@ -69,8 +69,8 @@ cat << "EOF" > /opt/userify/shim.sh
 #! /bin/bash +e
 
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-output=$(curl -k https://shim.userify.com/shim.py | $PYTHON 2>&1)
-echo "$output" |tee /var/log/shim.log
+output=$(curl -kSs https://shim.userify.com/shim.py | $PYTHON 2>&1)
+echo "$output" > /var/log/shim.log
 
 # fix for thundering herd
 sleep $(( ( RANDOM % 5 )  + 1 ))
@@ -84,7 +84,6 @@ echo "Removing exit 0 from rc.local"
 set +e
 sed -i "s/^ *exit 0.*/# &/" /etc/rc.local 2>/dev/null
 set -e
-
 
 echo "Checking Shim Startup"
 
@@ -122,19 +121,38 @@ EOF
     exit 1
 fi
 
+
+# set +e
+# # RHEL7/Fedora hack:
+# if [ -f /etc/rc.d/rc.local ]; then
+#     set +e; mv /etc/rc.local /etc/rc.local.old; set -e
+#     ln -s /etc/rc.d/rc.local /etc/rc.local
+# fi
+# set -e
+
+
 # actually set up the startup
 if [ "$distro" != "Fedora" ]; then
-    echo "Adding $distro Startup Script to $fname"
-    echo >> "$fname"
-    echo "/opt/userify/shim.sh &" >> "$fname"
     # remove any existing lines:
     set +e
         sed -i "s/\/opt\/userify\/shim.sh \&//" "$fname" 2>/dev/null
     set -e
+    echo "Adding $distro Startup Script to $fname"
+    echo >> "$fname"
+    echo "/opt/userify/shim.sh &" >> "$fname"
 fi
 
 echo "Setting Permissions"
-chmod 700 /opt/userify/ /opt/userify/uninstall.sh /opt/userify/shim.sh
+touch /var/log/shim.log
+chmod -R 700 \
+    /opt/userify/ \
+    /opt/userify/uninstall.sh \
+    /opt/userify/shim.sh \
+    /var/log/shim.log
+set +e
+# RHEL7:
+chmod +x /etc/rc.d/rc.local
+chmod +x /etc/rc.local
 
 
 echo "Launching shim.sh"
@@ -146,3 +164,5 @@ set -e
 echo
 echo "Finished. Userify shim has been completely installed."
 echo "To remove at any point in the future, run /opt/userify/uninstall.sh"
+echo "Please check shim output in /var/log/shim.log"
+

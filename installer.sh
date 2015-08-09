@@ -3,89 +3,231 @@
 # Userify Shim Installer
 # Copyright (c) 2011-2015 Userify Corporation
 
+# How the shim works:
+#
+# 1. Installer creates /opt/userify/ containing:
+#
+#       a.  /opt/userify/creds.py
+#       b.  /opt/userify/shim.sh - should start on reboot
+#       c.  /opt/userify/uninstall.sh
+#           
+#       d.  /var/log/shim.log - check this for output
+#
+#    Review shim.sh and uninstall.sh in this file below
+#    Entire /opt/userify directory and /var/log/shim.log is root-only.
+#
+#
+# 2. shim.sh, which should start on reboot, loops endlessly:
+#
+#       a.  download and run shim.py.
+#
+#       b.  shim.py reads creds.py and initiates a request for
+#           the latest user list.
+#
+#       c.  upon making needed changes, shim.py delays before
+#           exiting.
+#
 
+export RED_TEXT="[31m"
+export BLUE_TEXT="[34m"
+export GREEN_TEXT="[32m"
+export PURPLE_TEXT="[35m"
+export CYAN_TEXT="[36m"
+export RESET_TEXT="[0m"
+
+clear
+cat << EOF
+   
+             ${BLUE_TEXT}            _--_
+             ${BLUE_TEXT}           (    \\
+             ${BLUE_TEXT}        --/      )
+             ${BLUE_TEXT}   .-- /   \\      \\
+             ${BLUE_TEXT} ./   \\            )${PURPLE_TEXT} _  __
+             ${BLUE_TEXT}/${GREEN_TEXT}_   _ ___  ___ _ __${PURPLE_TEXT}(_)/ _|_   _
+             ${GREEN_TEXT}| | | / __|/ _ \ '__${PURPLE_TEXT}| | |_  | | |
+             ${GREEN_TEXT}| |_| \__ \  __/ |  ${PURPLE_TEXT}| |  _| |_| |
+             ${GREEN_TEXT} \__,_|___/\___|_|  ${PURPLE_TEXT}|_|_|  \__, |
+             ${GREEN_TEXT}                    ${PURPLE_TEXT}       |___/  ${GREEN_TEXT}tm
+${RESET_TEXT}
+
+[37;42m                Installing Userify now..                     ${RESET_TEXT}
+-------------------------------------------------------------
+${PURPLE_TEXT}Tip: to understand how the shim works, read the source at
+${CYAN_TEXT}https://github.com/userify/shim/
+${RESET_TEXT}
+EOF
+
+# Check for root
 if [ "$(id -u)" != "0" ]; then
     cat << EOF >&2
+${RED_TEXT}
 Unfortunately, the Userify Shim requires root permissions in order to
-create user accounts and manage sudoers.  The Shim is open source; please
-feel free to audit the code for security.
+create user accounts and manage sudoers. Please review the shim
+source code at https://github.com/userify/shim
+${RESET_TEXT}
 EOF
     exit 1
 fi
 
+
+# Check for Linux
 if [ "$(uname -s)" != "Linux" ]; then
-    echo "Currently, Userify supports only Linux systems." >&2
+    echo "${RED_TEXT}Currently, Userify supports only Linux systems.${RESET_TEXT}" >&2
 fi
 
-# on older apt-get systems, attempt to install sudo
-set +e
-apt-get update >/dev/null; apt-get -y install sudo >/dev/null
+
+# Attempt to install sudo on Debian
+# (might not be included on some very minimal/netinst Debian systems)
+# set +e
+# apt-get update 2>/dev/null
+# apt-get -y install sudo 2>/dev/null
+# set -e
+
+
 set -e
-
-echo "Installing Userify and halting on errors."
-
-
-set -e
-echo "Creating Userify directory (/opt/userify/)"
 [ -d /opt/userify ] && (
-    echo "Please remove /opt/userify before continuing." >&2; exit -1)
+    echo "${RED_TEXT}Please remove /opt/userify before continuing.${RESET_TEXT}" >&2
+    exit -1
+)
+
+
+echo "${GREEN_TEXT}Creating Userify directory (/opt/userify/)${RESET_TEXT}"
 mkdir /opt/userify/ || (
-    echo "Unable to create directory /opt/userify." >&2; exit 1)
+    echo "${RED_TEXT}Unable to create directory /opt/userify.${RESET_TEXT}" >&2
+    exit 1
+)
 
 
-echo "Creating uninstall script (/opt/userify/uninstall.sh)"
+# Create uninstall.sh script in /opt/userify
+
+echo "${GREEN_TEXT}Creating uninstall script (/opt/userify/uninstall.sh)${RESET_TEXT}"
 cat << EOF > /opt/userify/uninstall.sh
 #! /bin/sh +e
+
+# --------------------------------------------
+#
+# uninstall.sh
+# This script uninstalls the entire Userify agent and kills
+# off any shim processes that are still running.
+#
+# --------------------------------------------
+
+# Copyright (c) 2015 Userify Corp.
+
+echo
+echo
+echo -------------------------------------------------------------
+echo "[31mRemoving Userify...[0m"
+
 # Debian, Ubuntu, RHEL:
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/rc.local 2>/dev/null
+
 # SUSE:
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/init.d/after.local 2>/dev/null
-# # Fedora:
+
+# Fedora:
 # systemctl disable userify-shim.service 2>/dev/null
 # rm -f /etc/systemd/system/userify-shim.service 2>/dev/null
+
+# Wipe out entire /opt/userify directory
 rm -Rf /opt/userify/
+
+# Kill off remaining shim processes
 killall shim.py shim.sh
+
+echo [32m
+echo Finished!
+echo [0m-------------------------------------------------------------
+echo
+echo
+
 EOF
 
 
+
 if [ "x$api_id" != "x" ]; then
-    echo "Creating API login config (/opt/userify/creds.py)"
+    echo "${GREEN_TEXT}Creating API login config (/opt/userify/creds.py)${RESET_TEXT}"
     echo -n > /opt/userify/creds.py
     chmod 0600 /opt/userify/creds.py
     # create creds configuration file
     cat <<EOF >> /opt/userify/creds.py
-api_id="$api_id"
-api_key="$api_key"
+# Move this server to a different server group
+# by editing these.
+
+api_id = "$api_id"
+api_key = "$api_key"
+
 EOF
+
+    cat <<EOF >> /opt/userify/userify_config.py
+# Enable this to receive additional verbosity in /var/log/shim.log
+debug = False
+
+# Enable this to not actually make changes.
+# This can also be used to temporary disable the shim.
+dry_run = False
+
+# Changing these requires appropriate licensing.
+shim_host = "$shim_host"
+self_signed = $self_signed
+
+EOF
+
 else
-    echo "api_id variable not found, skipping creds.py creation."
+    echo "${RED_TEXT}api_id variable not found, skipping creds.py creation."
+    echo "This might be a bug unless you did this on purpose."
+    echo "NOTE, Userify cannot work without creds.py. Please create it yourself."
+    echo ${RESET_TEXT}
 fi
 
 
-echo "Creating shim (/opt/userify/shim.{sh,py})"
+# Create shim.sh script in /opt/userify
+
+echo "${GREEN_TEXT}Creating shim (/opt/userify/shim.{sh,py})${RESET_TEXT}"
 cat << "EOF" > /opt/userify/shim.sh
 #! /bin/bash +e
 
+# --------------------------------------------
+#
+# shim.sh
+# This is the script that actually calls
+# shim.py.
+#
+# --------------------------------------------
+
+# Copyright (c) 2015 Userify Corp.
+
+# keep shim.log from getting too big
+[[ $(find /var/log/shim.log -type f -size +524288c 2>/dev/null) ]] && \
+    rm /var/log/shim.log
+touch /var/log/shim.log
+chmod -R 600 /var/log/shim.log
+
+
+# kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
 output=$(curl -kSs https://shim.userify.com/shim.py | $PYTHON 2>&1)
-echo "$output" > /var/log/shim.log
+echo "$output" >> /var/log/shim.log
 
-# fix for thundering herd
+
+# a little extra fix for thundering herd
 sleep $(( ( RANDOM % 5 )  + 1 ))
 
+
+# call myself. fork before exiting.
 /opt/userify/shim.sh &
 
 EOF
 
 
-echo "Removing exit 0 from rc.local"
+echo "${GREEN_TEXT}Removing exit 0 from rc.local (if there)${RESET_TEXT}"
 set +e
 sed -i "s/^ *exit 0.*/# &/" /etc/rc.local 2>/dev/null
 set -e
 
-echo "Checking Shim Startup"
+echo "${GREEN_TEXT}Checking Shim Startup${RESET_TEXT}"
 
 # most Linux versions can manage with a line added to rc.local:
 if [ -f /etc/rc.local ]; then
@@ -110,13 +252,14 @@ elif [ -f /etc/init.d/after.local ]; then
 #     systemctl enable userify-shim.service
 else
     cat << EOF >&2
+${RED_TEXT}
 Unable to set start at bootup -- no /etc/rc.local file?
 You'll have to set shim to startup on it's own: create an
 init script that launches /opt/userify/shim.sh on startup.
 In most distributions, this would have been a single line
 in /etc/rc.local, but you may need to do something more
 exotic. Please contact us with Linux version information
-and we may have more information for you.
+and we may have more information for you.${RESET_TEXT}
 EOF
     exit 1
 fi
@@ -137,32 +280,50 @@ if [ "$distro" != "Fedora" ]; then
     set +e
         sed -i "s/\/opt\/userify\/shim.sh \&//" "$fname" 2>/dev/null
     set -e
-    echo "Adding $distro Startup Script to $fname"
+    echo "${GREEN_TEXT}Adding $distro Startup Script to $fname${RESET_TEXT}"
     echo >> "$fname"
     echo "/opt/userify/shim.sh &" >> "$fname"
 fi
 
-echo "Setting Permissions"
-touch /var/log/shim.log
+echo "${GREEN_TEXT}Setting Permissions${RESET_TEXT}"
 chmod -R 700 \
     /opt/userify/ \
     /opt/userify/uninstall.sh \
-    /opt/userify/shim.sh \
-    /var/log/shim.log
+    /opt/userify/shim.sh
+rm /var/log/shim.log
+touch /var/log/shim.log
 set +e
+chmod +x /etc/rc.local 2>/dev/null
 # RHEL7:
-chmod +x /etc/rc.d/rc.local
-chmod +x /etc/rc.local
+chmod +x /etc/rc.d/rc.local 2>/dev/null
 
 
-echo "Launching shim.sh"
+echo "${GREEN_TEXT}Launching shim.sh${RESET_TEXT}"
 set +e;
 killall shim.py shim.sh 2>/dev/null
 set -e
 /opt/userify/shim.sh &
 
 echo
-echo "Finished. Userify shim has been completely installed."
-echo "To remove at any point in the future, run /opt/userify/uninstall.sh"
-echo "Please check shim output in /var/log/shim.log"
+echo "${PURPLE_TEXT}Finished. Userify shim has been completely installed."
+echo "/opt/userify/uninstall.sh as root to uninstall."
+echo "Please review first shim output in /var/log/shim.log."
+# echo "(wait a few seconds..)"
+# echo ${BLUE_TEXT}
+# sleep 2
+# output=$(cat /var/log/shim.log)
+# if [ "x$output" == "x" ]; then
+#     echo ${RED_TEXT}
+#     echo Unable to review shim.log, please review it separately
+#     echo to ensure the shim is working properly.
+    echo i.e.,:  ${BLUE_TEXT}cat /var/log/shim.log${RESET_TEXT}
+# else
+#     echo $OUTPUT
+# fi
+echo ${GREEN_TEXT}
+echo "Thanks for using Userify!"
+echo ${RESET_TEXT}
+echo -------------------------------------------------------------
+echo
+
 

@@ -86,7 +86,9 @@ fi
 
 set -e
 [ -d /opt/userify ] && (
-    echo "${RED_TEXT}Please remove /opt/userify before continuing.${RESET_TEXT}" >&2
+    echo "${RED_TEXT}Please remove /opt/userify, or execute
+    ${GREEN_TEXT} sudo ${BLUE_TEXT}/opt/userify/uninstall.sh
+${RED_TEXT}before continuing.${RESET_TEXT}" >&2
     exit -1
 )
 
@@ -138,7 +140,11 @@ rm -Rf /opt/userify/
 killall shim.py shim.sh
 
 echo [32m
+
 echo Finished!
+echo Userify has been removed, but the user accounts it created still
+echo exist and no changes have been made to them.
+echo You can now install a new Userify shim as desired.
 echo [0m-------------------------------------------------------------
 echo
 echo

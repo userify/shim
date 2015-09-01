@@ -137,7 +137,7 @@ sed -i "s/\/opt\/userify\/shim.sh \&//" \
 rm -Rf /opt/userify/
 
 # Kill off remaining shim processes
-killall shim.py shim.sh
+killall shim.py shim.sh 2>/dev/null
 
 echo [32m
 
@@ -206,6 +206,7 @@ cat << "EOF" > /opt/userify/shim.sh
 # Copyright (c) 2015 Userify Corp.
 
 # keep shim.log from getting too big
+touch /var/log/shim.log
 [[ $(find /var/log/shim.log -type f -size +524288c 2>/dev/null) ]] && \
     rm /var/log/shim.log
 touch /var/log/shim.log

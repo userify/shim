@@ -134,7 +134,11 @@ def sshkeytext(ssh_public_key):
         "# Paste your new key at console.userify.com.", ssh_public_key, ""))
 
 
-def sshkey_add(username, ssh_public_key):
+def sshkey_add(username, ssh_public_key=""):
+
+    if not ssh_public_key:
+        return
+
     userpath = "/home/" + username
     sshpath = userpath + "/.ssh/"
 
@@ -229,7 +233,8 @@ def process_users(good_users):
     for username, user in good_users.iteritems():
         if username not in current_usernames():
             useradd(user["name"], username, user["preferred_shell"])
-        sshkey_add(username, user["ssh_public_key"])
+        if "ssh_public_key" in user:
+            sshkey_add(username, user["ssh_public_key"])
         sudoers_add(username, user["perm"])
     for userrow in current_userify_users():
         username = userrow[0]

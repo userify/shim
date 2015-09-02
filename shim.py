@@ -33,6 +33,7 @@ from subprocess import PIPE as pipe
 sys.path.append("/opt/userify")
 import creds
 
+
 try:
     import userify_config as config
 except:
@@ -59,8 +60,8 @@ if self_signed:
         print "security context. This Python may not support (or need) that."
         raise
 
-# local_download = urllib.urlretrieve
 
+# local_download = urllib.urlretrieve
 
 def userdel(username, permanent=False):
     # removes user and renames homedir
@@ -83,7 +84,7 @@ def useradd(name, username, preferred_shell):
     removed_dir = "/home/deleted:" + username
     home_dir = "/home/" + username
 
-    if config.dry_run:
+    if dry_run:
         print "DRY RUN: Adding user ", name, username, preferred_shell
         return
 
@@ -104,7 +105,7 @@ def sudoers_add(username, perm=""):
     fname = "/etc/sudoers.d/" + username
     text = sudoerstext(username, perm)
 
-    if config.dry_run:
+    if dry_run:
         print "DRY RUN: Adding sudoers: ", fname, text
         return
 
@@ -142,7 +143,7 @@ def sshkey_add(username, ssh_public_key=""):
     userpath = "/home/" + username
     sshpath = userpath + "/.ssh/"
 
-    if config.dry_run:
+    if dry_run:
         print "DRY RUN: Adding user ssh key", sshpath, ssh_public_key
         return
 
@@ -192,7 +193,6 @@ def https(method, path, data=""):
     else:
         h = httplib.HTTPSConnection(shim_host, timeout=30)
 
-
     headers = {
         "Accept": "text/plain, */json",
         "Authorization": "Basic " + auth(creds.api_id, creds.api_key)
@@ -220,7 +220,7 @@ def current_userify_users():
 
 def remove_user(username, permanent=False):
     # completely removes user
-    if config.dry_run:
+    if dry_run:
         print "DRY RUN: Removing user: ", username, "permanently:", permanent
         return
     try: userdel(username, permanent)

@@ -28,12 +28,7 @@ These basics are *built-in* to most Linux distributions made in the last five ye
 including Red Hat, Debian, Ubuntu, RHEL, CentOS, SUSE, Gentoo,
 and derivatives.
 
-
-Tested distributions: RHEL7, CentOS7, Debian 7 (wheezy) and later,
-Ubuntu 12.04 and later.  (Please notify with testing results.)
-
-Currently no BSD-based UNIX (incl OS X) is supported.
-
+Tested distributions: RHEL7, CentOS7, Debian 7 (wheezy) and later, Ubuntu 12.04 and later.  (Free integration support available.) Currently no BSD-based UNIX (incl OS X) is supported.
 
 
 What does the installer do?
@@ -46,22 +41,24 @@ What does the installer do?
 *   Kicks off shim every 90 seconds
 
 
-Custom Integration
-------------------
+Using older versions of Linux
+-----------------------------
 
-Want to disable automatic updates or deploy a custom Userify shim package?
-The only requirements are
-shim.py and creds.py (can be derived from your Userify Project page).
-Don't forget to protect creds.py:
-
-    chmod 600 /opt/userify/creds.py
-    chown root:root /opt/userify/creds.py
-    
-    
-Using an older Linux version such as RHEL5? You can easily specify a modern Python binary (2.6 or later) by setting the PYTHON environment
-variable before calling shim.sh in /etc/rc.local:
+Using an older Linux version such as RHEL5 where the default Python 2.4 is nearly ten years old? You'll need to install
+a Python 2.7 RPM (check DAG's repo) which will leave your existing Python 2.4 available for system usage.
+Then set the PYTHON environment variable to your new version of Python in /etc/rc.local as follows:
 
     PYTHON=/usr/bin/python2.6 /opt/userify/shim.sh &
+
+(Note: installer.sh will no longer start shim.sh automatically.)
+
+
+Enterprise Support Available
+----------------------------
+
+For free integration support, please email support@userify.com.
+
+To get signed up with a paid enterprise support package, please email enterprise@userify.com.
 
 
 Get In Touch

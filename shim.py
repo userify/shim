@@ -253,17 +253,17 @@ def main():
         print response.status, response.reason
         pprint(text)
     try:
-        commands = json.loads(text)
+        configuration = json.loads(text)
         if debug or failure:
-            pprint(commands)
-        if failure and "error" in commands:
-            print "\n", response.reason.upper(), commands["error"]
+            pprint(configuration)
+        if failure and "error" in configuration:
+            print "\n", response.reason.upper(), configuration["error"]
     except:
         failure = True
-    if "error" in commands or failure:
+    if "error" in configuration or failure:
         return 3
-    process_users(commands["users"])
-    return commands["shim-delay"] if "shim-delay" in commands else 1
+    process_users(configuration["users"])
+    return configuration["shim-delay"] if "shim-delay" in configuration else 1
 
 
 

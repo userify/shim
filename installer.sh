@@ -297,7 +297,7 @@ chmod -R 700 \
     /opt/userify/ \
     /opt/userify/uninstall.sh \
     /opt/userify/shim.sh
-rm /var/log/shim.log
+[ -f /var/log/shim.log ] && rm /var/log/shim.log
 touch /var/log/shim.log
 set +e
 chmod +x /etc/rc.local 2>/dev/null

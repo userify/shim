@@ -91,8 +91,11 @@ def useradd(name, username, preferred_shell):
     # restore removed home directory
     if not os.path.isdir(home_dir) and os.path.isdir(removed_dir):
         qexec(["/bin/mv", removed_dir, home_dir])
-    cmd = ["/usr/sbin/useradd", "-m"
-            if not os.path.isdir(home_dir) else "",
+    if os.path.isdir(home_dir):
+        useradd_suffix = ""
+    else:
+        useradd_suffix = "-m"
+    cmd = ["/usr/sbin/useradd", useradd_suffix,
         "--comment", "userify-" + name,
         "-s", preferred_shell if preferred_shell else "/bin/bash",
         "--user-group", username]

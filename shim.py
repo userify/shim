@@ -24,6 +24,7 @@ import datetime
 import time
 import traceback
 import base64
+import grp
 import urllib
 import random
 from pprint import pprint
@@ -75,9 +76,11 @@ def userdel(username, permanent=False):
         # RHEL:
         qexec(["/usr/bin/pkill", "-9", "-u", username])
         qexec(["/usr/sbin/userdel", username])
+        qexec(["/usr/sbin/groupdel", username])
         qexec(["/bin/mv", home_dir, removed_dir])
     else:
         qexec(["/usr/sbin/userdel", "-r", username])
+        qexec(["/usr/sbin/groupdel", username])
 
 
 def useradd(name, username, preferred_shell):
@@ -89,17 +92,25 @@ def useradd(name, username, preferred_shell):
         return
 
     # restore removed home directory
+    cmd = ["/usr/sbin/useradd"]
     if not os.path.isdir(home_dir) and os.path.isdir(removed_dir):
         qexec(["/bin/mv", removed_dir, home_dir])
-    if os.path.isdir(home_dir):
-        useradd_suffix = ""
+    if not os.path.isdir(home_dir):
+        cmd.append(useradd_suffix = "-m")
+
+    cmd.append("-s")
+    if preferred_shell:
+        cmd.append(preferred_shell)
     else:
-        useradd_suffix = "-m"
-    cmd = ["/usr/sbin/useradd", useradd_suffix,
-        "--comment", "userify-" + name,
-        "-s", preferred_shell if preferred_shell else "/bin/bash",
-        "--user-group", username]
-    subprocess.call([i for i in cmd if i])
+        cmd.append("/bin/bash")
+    try:
+        group_entity = grp.getgrnam(username)
+        cmd.append("--gid")
+        cmd.append(str(group_entity[2]))
+    except KeyError:
+        cmd.append("--user-group")
+    cmd.append(username)
+    qexec(cmd)
     fullchown(username, home_dir)
     parse_passwd()
 

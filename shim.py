@@ -218,9 +218,14 @@ def https(method, path, data=""):
 def parse_passwd():
     # returns a list of passwd lines, ordered as
     # username, unused, uid, gid, comment, homedir, shell
-    app["passwd"] = [[i.strip() for i in l.split(":")]
+    app["init"] = [[i.strip() for i in l.split(":")]
         for l in open("/etc/passwd").read().strip().split("\n")]
-    app["passwd"] = [i if len(i)>6 else i.append("") for i in app["passwd"]]
+    for i in app["init"]:
+        if len(i) > 6:
+            app["passwd"].append(i)
+        else:
+            i.append("")
+            app["passwd"].append(i)
 
 
 def current_usernames():
@@ -277,11 +282,15 @@ def main():
     if "error" in configuration or failure:
         return 3
     process_users(configuration["users"])
-    return configuration["shim-delay"] if "shim-delay" in configuration else 1
+    if "shim-delay" in configuration:
+        return configuration["shim-delay"]
+    else:
+        return 1
 
 
 
 app = {}
+app["passwd"] = []
 if __name__ == "__main__":
     try:
         print

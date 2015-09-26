@@ -35,6 +35,9 @@ export PURPLE_TEXT="[35m"
 export CYAN_TEXT="[36m"
 export RESET_TEXT="[0m"
 
+# for use only with Enterprise/Pro:
+export SELFSIGNED="$1"
+
 clear
 cat << EOF
    
@@ -215,7 +218,7 @@ chmod -R 600 /var/log/shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-output=$(curl -kSs https://shim.userify.com/shim.py | $PYTHON 2>&1)
+output=$(curl -${SELFSIGNED}Ss https://shim.userify.com/shim.py | $PYTHON 2>&1)
 echo "$output" >> /var/log/shim.log
 
 

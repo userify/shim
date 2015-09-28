@@ -96,7 +96,7 @@ def useradd(name, username, preferred_shell):
     if not os.path.isdir(home_dir) and os.path.isdir(removed_dir):
         qexec(["/bin/mv", removed_dir, home_dir])
     if not os.path.isdir(home_dir):
-        cmd.append(useradd_suffix = "-m")
+        cmd.append("-m")
 
     cmd.append("-s")
     if preferred_shell:

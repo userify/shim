@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Userify Shim
-# Copyright (c) 2012-2014 Userify
+# Copyright (c) 2012-2015 Userify
 
 # Note: the shim can be easily installed and configured via the shim installer,
 # or just installed manually after creating the creds.py file.

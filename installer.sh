@@ -92,7 +92,7 @@ set -e
     echo "${RED_TEXT}Please remove /opt/userify, or execute
     ${GREEN_TEXT} sudo ${BLUE_TEXT}/opt/userify/uninstall.sh
 ${RED_TEXT}before continuing.${RESET_TEXT}" >&2
-    exit -1
+    exit 1
 )
 
 

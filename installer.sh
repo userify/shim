@@ -8,10 +8,9 @@
 # 1. Installer creates /opt/userify/ containing:
 #
 #       a.  /opt/userify/creds.py
-#       b.  /opt/userify/shim.sh - should start on reboot
+#       b.  /opt/userify/shim.sh (autostart on boot)
 #       c.  /opt/userify/uninstall.sh
-#           
-#       d.  /var/log/shim.log - check this for output
+#       d.  /var/log/shim.log (check this for output)
 #
 #    Review shim.sh and uninstall.sh in this file below
 #    Entire /opt/userify directory and /var/log/shim.log is root-only.

@@ -168,12 +168,13 @@ def fullchmod(mode, path):
 
 def qexec(cmd):
     print "[shim] exec: \"" + " ".join(cmd) + '"'
-    try: subprocess.check_call(cmd)
-         # ,stderr=pipe, stdout=pipe)
-    except:
+    try:
+        subprocess.check_call(cmd)
+    except Exception, e:
         traceback.print_exc()
-        pass
-
+        print "ERROR executing %s" % " ".join(cmd)
+        print e
+        print "Retrying.. (shim.sh)"
 
 def failsafe_mkdir(path):
     try: os.mkdir(path)
@@ -255,6 +256,7 @@ def main():
     if debug or failure:
         print response.status, response.reason
         pprint(text)
+    configuration = {"error": "Unknown error parsing configuration"}
     try:
         configuration = json.loads(text)
         if debug or failure:
@@ -263,7 +265,8 @@ def main():
             print "\n", response.reason.upper(), configuration["error"]
     except:
         failure = True
-    if "error" in configuration or failure:
+        traceback.print_exc()
+    if failure or "error" in configuration:
         return 3
     process_users(configuration["users"])
     return configuration["shim-delay"] if "shim-delay" in configuration else 1
@@ -277,11 +280,15 @@ if __name__ == "__main__":
         print '-'*30
         print "[shim] start: %s" % time.ctime()
         s = time.time()
-        time_to_wait = main()
+        try:
+            time_to_wait = int(main())
+        except:
+            traceback.print_exc()
+            time_to_wait = 3
         elapsed = time.time() - s
         print "[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s"
         if elapsed < time_to_wait:
-            print "[shim] sleeping: %s" % (time_to_wait-elapsed)
+            print "[shim] sleeping: %ss" % int(time_to_wait-elapsed)
             time.sleep(time_to_wait-elapsed)
     except:
         time.sleep(3)

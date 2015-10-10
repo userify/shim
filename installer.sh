@@ -10,10 +10,10 @@
 #       a.  /opt/userify/creds.py
 #       b.  /opt/userify/shim.sh (autostart on boot)
 #       c.  /opt/userify/uninstall.sh
-#       d.  /var/log/shim.log (check this for output)
+#       d.  /var/log/userify-shim.log (check this for output)
 #
 #    Review shim.sh and uninstall.sh in this file below
-#    Entire /opt/userify directory and /var/log/shim.log is root-only.
+#    Entire /opt/userify directory and /var/log/userify-shim.log is root-only.
 #
 #
 # 2. shim.sh, which should start on reboot, loops endlessly:
@@ -170,16 +170,16 @@ api_key = "$api_key"
 EOF
 
     cat <<EOF >> /opt/userify/userify_config.py
-# Enable this to receive additional verbosity in /var/log/shim.log
-debug = False
+# Enable this to receive additional verbosity in /var/log/userify-shim.log
+debug=0
 
 # Enable this to not actually make changes.
 # This can also be used to temporary disable the shim.
-dry_run = False
+dry_run=0
 
 # Changing these requires appropriate licensing.
-shim_host = "$shim_host"
-self_signed = $self_signed
+shim_host="$shim_host"
+self_signed=$self_signed
 
 EOF
 
@@ -207,18 +207,21 @@ cat << "EOF" > /opt/userify/shim.sh
 
 # Copyright (c) 2015 Userify Corp.
 
-# keep shim.log from getting too big
-touch /var/log/shim.log
-[[ $(find /var/log/shim.log -type f -size +524288c 2>/dev/null) ]] && \
-    rm /var/log/shim.log
-touch /var/log/shim.log
-chmod -R 600 /var/log/shim.log
+shim_host="shim.userify.com"
+source /opt/userify/userify_config.py
+[ "x$self_signed" == "x1" ] && SELFSIGNED='k' || SELFSIGNED=''
 
+# keep userify-shim.log from getting too big
+touch /var/log/userify-shim.log
+[[ $(find /var/log/userify-shim.log -type f -size +524288c 2>/dev/null) ]] && \
+    rm /var/log/userify-shim.log
+touch /var/log/userify-shim.log
+chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-output=$(curl -${SELFSIGNED}Ss https://shim.userify.com/shim.py | $PYTHON 2>&1)
-echo "$output" >> /var/log/shim.log
+output=$(curl -${SELFSIGNED}Ss https://$shim_host/shim.py | $PYTHON 2>&1)
+echo "$output" >> /var/log/userify-shim.log
 
 
 # a little extra fix for thundering herd
@@ -299,8 +302,8 @@ chmod -R 700 \
     /opt/userify/ \
     /opt/userify/uninstall.sh \
     /opt/userify/shim.sh
-[ -f /var/log/shim.log ] && rm /var/log/shim.log
-touch /var/log/shim.log
+[ -f /var/log/userify-shim.log ] && rm /var/log/userify-shim.log
+touch /var/log/userify-shim.log
 set +e
 chmod +x /etc/rc.local 2>/dev/null
 # RHEL7:
@@ -316,16 +319,16 @@ set -e
 echo
 echo "${PURPLE_TEXT}Finished. Userify shim has been completely installed."
 echo "/opt/userify/uninstall.sh as root to uninstall."
-echo "Please review first shim output in /var/log/shim.log."
+echo "Please review first shim output in /var/log/userify-shim.log."
 # echo "(wait a few seconds..)"
 # echo ${BLUE_TEXT}
 # sleep 2
-# output=$(cat /var/log/shim.log)
+# output=$(cat /var/log/userify-shim.log)
 # if [ "x$output" == "x" ]; then
 #     echo ${RED_TEXT}
-#     echo Unable to review shim.log, please review it separately
+#     echo Unable to review userify-shim.log, please review it separately
 #     echo to ensure the shim is working properly.
-    echo i.e.,:  ${BLUE_TEXT}cat /var/log/shim.log${RESET_TEXT}
+    echo i.e.,:  ${BLUE_TEXT}cat /var/log/userify-shim.log${RESET_TEXT}
 # else
 #     echo $OUTPUT
 # fi

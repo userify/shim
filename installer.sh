@@ -247,7 +247,11 @@ set -e
 echo "${GREEN_TEXT}Checking Shim Startup${RESET_TEXT}"
 
 # most Linux versions can manage with a line added to rc.local:
-if [ -f /etc/rc.local ]; then
+if [ -f /etc/rc.d/rc.local ]; then
+    # RHEL7/Fedora/Amazon Linux
+    distro="Linux"
+    fname=/etc/rc.d/rc.local
+elif [ -f /etc/rc.local ]; then
     distro="Linux"
     fname=/etc/rc.local
 elif [ -f /etc/init.d/after.local ]; then
@@ -281,14 +285,9 @@ EOF
     exit 1
 fi
 
-
 # set +e
-# # RHEL7/Fedora hack:
-# if [ -f /etc/rc.d/rc.local ]; then
 #     set +e; mv /etc/rc.local /etc/rc.local.old; set -e
 #     ln -s /etc/rc.d/rc.local /etc/rc.local
-# fi
-# set -e
 
 
 # actually set up the startup

@@ -123,6 +123,11 @@ echo
 echo -------------------------------------------------------------
 echo "[31mRemoving Userify...[0m"
 
+if [[ $EUID -ne 0 ]]; then
+    echo 'Need to have root privileges.'
+    exit 1;
+fi
+
 # Debian, Ubuntu, RHEL:
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/rc.local 2>/dev/null
@@ -139,7 +144,7 @@ sed -i "s/\/opt\/userify\/shim.sh \&//" \
 rm -Rf /opt/userify/
 
 # Kill off remaining shim processes
-killall shim.py shim.sh 2>/dev/null
+killall shim.py shim.sh >/dev/null 2>&1
 
 echo [32m
 

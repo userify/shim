@@ -106,7 +106,7 @@ mkdir /opt/userify/ || (
 
 echo "${GREEN_TEXT}Creating uninstall script (/opt/userify/uninstall.sh)${RESET_TEXT}"
 cat << EOF > /opt/userify/uninstall.sh
-#! /bin/sh +e
+#! /bin/bash +e
 
 # --------------------------------------------
 #

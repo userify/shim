@@ -226,6 +226,10 @@ chmod -R 600 /var/log/userify-shim.log
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
 output=$(curl -${SELFSIGNED}Ss https://$shim_host/shim.py | $PYTHON 2>&1)
+if [ $? != 0 ]; then
+    # extra backoff in event of failure
+    sleep $(( ( RANDOM % 30 )  + 30 ))
+fi
 echo "$output" >> /var/log/userify-shim.log
 
 

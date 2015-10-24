@@ -106,7 +106,7 @@ mkdir /opt/userify/ || (
 
 echo "${GREEN_TEXT}Creating uninstall script (/opt/userify/uninstall.sh)${RESET_TEXT}"
 cat << EOF > /opt/userify/uninstall.sh
-#! /bin/bash +e
+#! /bin/sh +e
 
 # --------------------------------------------
 #
@@ -123,7 +123,7 @@ echo
 echo -------------------------------------------------------------
 echo "[31mRemoving Userify...[0m"
 
-if [[ $EUID -ne 0 ]]; then
+if [ "$(id -u)" != "0" ]; then
     echo 'Need to have root privileges.'
     exit 1;
 fi

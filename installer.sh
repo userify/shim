@@ -183,8 +183,8 @@ debug=0
 dry_run=0
 
 # Changing these requires appropriate licensing.
-shim_host="$shim_host"
-self_signed=$self_signed
+if [ -z "$shim_host" ]; then shim_host="shim.userify.com"; fi
+if [ -z "$self_signed" ]; then self_signed="0"; fi
 
 EOF
 

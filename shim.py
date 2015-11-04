@@ -33,12 +33,20 @@ from subprocess import PIPE as pipe
 sys.path.append("/opt/userify")
 import creds
 
-
 try:
     import userify_config as config
 except:
     import creds as config
 
+if os.path.isfile("/opt/userify/userify_config.py"):
+    cfg = open("/opt/userify/userify_config.py").read()
+    cfg = cfg.replace(
+        """if [ -z "configure.userify.com" ]; then shim_host="shim.userify.com"; fi""",
+        "shim_host=\"shim.userify.com\"")
+    cfg = cfg.replace(
+        """if [ -z "0" ]; then self_signed="0"; fi""",
+        "self_signed=0")
+    open("/opt/userify/userify_config.py", "w").write(cfg)
 
 self_signed = getattr(config, "self_signed", False)
 dry_run = getattr(config, "dry_run", False)

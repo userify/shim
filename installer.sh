@@ -164,27 +164,46 @@ if [ "x$api_id" != "x" ]; then
     echo "${GREEN_TEXT}Creating API login config (/opt/userify/creds.py)${RESET_TEXT}"
     echo -n > /opt/userify/creds.py
     chmod 0600 /opt/userify/creds.py
+
+if [ -z "$shim_host" ]; then shim_host="shim.userify.com"; fi
+if [ -z "$self_signed" ]; then self_signed="0"; fi
+
     # create creds configuration file
     cat <<EOF >> /opt/userify/creds.py
-# Move this server to a different server group
-# by editing these.
+# Userify Credentials Configuration
+# This file should be owned and readable only by root.
+
+# This file sourced by both Python and Bash scripts, so please ensure changes
+# are loadable by each.
+
+# Instantly move this server to a different server group, even a server group
+# in a different company, by replacing these with the credentials for the new
+# server group.
 
 api_id = "$api_id"
 api_key = "$api_key"
 
 EOF
 
+
+# Create new, optional userify_config.py file
+
     cat <<EOF >> /opt/userify/userify_config.py
-# Enable this to receive additional verbosity in /var/log/userify-shim.log
-debug=0
+# Userify Shim Configuration
+
+# This file sourced by both Python and Bash scripts, so please ensure changes
+# are loadable by each.
+
+# Enable this for additional verbosity in /var/log/userify-shim.log
+debug=1
 
 # Enable this to not actually make changes.
 # This can also be used to temporary disable the shim.
 dry_run=0
 
-# Changing these requires appropriate licensing.
-if [ -z "$shim_host" ]; then shim_host="shim.userify.com"; fi
-if [ -z "$self_signed" ]; then self_signed="0"; fi
+# Userify Enterprise/Pro licenses
+shim_host="$shim_host"
+self_signed=$self_signed
 
 EOF
 

@@ -247,13 +247,13 @@ chmod -R 600 /var/log/userify-shim.log
 output=$(curl -${SELFSIGNED}Ss https://$shim_host/shim.py | $PYTHON 2>&1)
 if [ $? != 0 ]; then
     # extra backoff in event of failure
-    sleep $(( ( RANDOM % 30 )  + 30 ))
+    sleep $(( ( $RANDOM % 30 )  + 30 ))
 fi
 echo "$output" >> /var/log/userify-shim.log
 
 
 # a little extra fix for thundering herd
-sleep $(( ( RANDOM % 5 )  + 1 ))
+sleep $(( ( $RANDOM % 5 )  + 1 ))
 
 
 # call myself. fork before exiting.

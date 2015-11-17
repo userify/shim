@@ -1,35 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <title>Shim by userify</title>
 
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
-    <title>Shim by userify</title>
   </head>
-
   <body>
-    <header>
-      <div class="inner">
+    <div class="wrapper">
+      <header>
         <h1>Shim</h1>
-        <h2>Userify Shim</h2>
-        <a href="https://github.com/userify/shim" class="button"><small>View project on</small>GitHub</a>
-      </div>
-    </header>
+        <p>Userify Shim</p>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
-<a name="shim" class="anchor" href="#shim"><span class="octicon octicon-link"></span></a>shim</h1>
+        <p class="view"><a href="https://github.com/userify/shim">View the Project on GitHub <small>userify/shim</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/userify/shim/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/userify/shim/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/userify/shim">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="shim" class="anchor" href="#shim" aria-hidden="true"><span class="octicon octicon-link"></span></a>shim</h1>
 
 <p>The Userify shim creates users, manages sudo permissions, etc based on
 the user accounts that you've configured in the Userify web console (<a href="https://console.userify.com">https://console.userify.com</a>)
@@ -43,7 +43,7 @@ We're here to help. If you experience any issues, let us know.</p>
 <p>It has zero requirements beyond what is included in every major distribution today.</p>
 
 <h2>
-<a name="system-requirements" class="anchor" href="#system-requirements"><span class="octicon octicon-link"></span></a>System Requirements</h2>
+<a id="system-requirements" class="anchor" href="#system-requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>System Requirements</h2>
 
 <p>The Userify shim is very short (please read it for yourself)
 and only requires:</p>
@@ -53,7 +53,9 @@ and only requires:</p>
 <li> curl (command-line), sudo</li>
 <li> Python 2.6 or later (for httplib timeout, simplejson)</li>
 <li> HTTPS access to shim.userify.com (currently proxies are not supported)</li>
-</ul><p>These basics are <em>built-in</em> to most Linux distributions made in the last five years,
+</ul>
+
+<p>These basics are <em>built-in</em> to most Linux distributions made in the last five years,
 including Red Hat, Debian, Ubuntu, RHEL, CentOS, SUSE, Gentoo,
 and derivatives. Need FreeBSD or other UNIX? Get in touch with specific
 needs.</p>
@@ -62,7 +64,7 @@ needs.</p>
 Ubuntu 12.04 and later.  (Please notify with testing results.)</p>
 
 <h2>
-<a name="what-does-the-installer-do" class="anchor" href="#what-does-the-installer-do"><span class="octicon octicon-link"></span></a>What does the installer do?</h2>
+<a id="what-does-the-installer-do" class="anchor" href="#what-does-the-installer-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>What does the installer do?</h2>
 
 <ul>
 <li>  Create /opt/userify and credentials file in it (creds.py)</li>
@@ -70,8 +72,10 @@ Ubuntu 12.04 and later.  (Please notify with testing results.)</p>
 with a link to the daemon</li>
 <li>  Creates an uninstall script at /opt/userify/uninstall.sh</li>
 <li>  Kicks off shim every 90 seconds</li>
-</ul><h2>
-<a name="custom-integration" class="anchor" href="#custom-integration"><span class="octicon octicon-link"></span></a>Custom Integration</h2>
+</ul>
+
+<h2>
+<a id="custom-integration" class="anchor" href="#custom-integration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom Integration</h2>
 
 <p>Want to disable automatic updates or deploy a custom Userify shim package?
 The only requirements are
@@ -89,31 +93,19 @@ variable before calling shim.sh in /etc/rc.local:</p>
 </code></pre>
 
 <h2>
-<a name="get-in-touch" class="anchor" href="#get-in-touch"><span class="octicon octicon-link"></span></a>Get In Touch</h2>
+<a id="get-in-touch" class="anchor" href="#get-in-touch" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get In Touch</h2>
 
 <p>We are available to assist with questions, custom installations, directory
 integrations or deployments, self-hosted installations, and professional
 consulting. Please open an issue with your question or contact support for
 assistance.</p>
-        </section>
-
-        <aside id="sidebar">
-          <a href="https://github.com/userify/shim/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/userify/shim/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/userify/shim"></a> is maintained by <a href="https://github.com/userify">userify</a>.</p>
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/userify">userify</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
     </div>
-
-  
+    <script src="javascripts/scale.fix.js"></script>
+    
   </body>
 </html>

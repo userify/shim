@@ -27,6 +27,7 @@ import base64
 import urllib
 import random
 from pprint import pprint
+import socket
 # catch stderr
 from subprocess import PIPE as pipe
 
@@ -182,6 +183,18 @@ def failsafe_mkdir(path):
 def auth(id,key):
     return base64.b64encode(":".join((creds.api_id, creds.api_key)))
 
+def get_ip():
+    # http://stackoverflow.com/a/28950776
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # this may fail if not network access at all is available
+        s.connect(('10.255.255.255', 0))
+        IP = s.getsockname()[0]
+    except:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 def https(method, path, data=""):
 
@@ -197,7 +210,8 @@ def https(method, path, data=""):
 
     headers = {
         "Accept": "text/plain, */json",
-        "Authorization": "Basic " + auth(creds.api_id, creds.api_key)
+        "Authorization": "Basic " + auth(creds.api_id, creds.api_key),
+        "X-Local-IP": get_ip()
     }
     h.request(method, path, data, headers)
     return h

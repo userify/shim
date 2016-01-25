@@ -43,7 +43,7 @@ self_signed = getattr(config, "self_signed", False)
 dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
-
+ec2md = ["instance-type", "hostname", "ami-id", "mac"]
 
 # check for self_signed
 ssl_security_context = None
@@ -183,6 +183,20 @@ def failsafe_mkdir(path):
 def auth(id,key):
     return base64.b64encode(":".join((creds.api_id, creds.api_key)))
 
+def instance_metadata(keys):
+    # instance metadata feature (only for ec2)
+    d = {}
+    h = httplib.HTTPConnection("169.254.169.254", timeout=.5)
+    try:
+        for k in keys:
+            h.request("GET", "/latest/meta-data/%s" % k)
+            resp = h.getresponse()
+            if resp.status == 200:
+                d[k] = resp.read()
+    except:
+        pass
+    return d
+
 def get_ip():
     # http://stackoverflow.com/a/28950776
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -207,6 +221,10 @@ def https(method, path, data=""):
                 context=ssl_security_context)
     else:
         h = httplib.HTTPSConnection(shim_host, timeout=30)
+
+    data = data or {}
+    data.update(instance_metadata(ec2md))
+    data = json.dumps(data)
 
     headers = {
         "Accept": "text/plain, */json",

@@ -44,8 +44,29 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
+shim_version = "01242016-1"
 
-# check for self_signed
+
+# huge thanks to Pundar Gunasekara at News Corp
+# for the basis for the secure https_proxy code.
+
+def retrieve_https_proxy():
+    if not 'https_proxy' in os.environ:
+        return "", 443
+    https_proxy = os.environ['https_proxy'].strip()
+    if https_proxy and https_proxy.startswith("https://"):
+        https_proxy = https_proxy.split("https://")[1]
+        https_proxy_port = 443
+        if ":" in https_proxy:
+            https_proxy, https_proxy_port = https_proxy.split(":")
+            https_proxy_port = int(https_proxy_port)
+    return https_proxy, https_proxy_port
+
+# check for self_signed for Userify Enterprise.
+# (Userify Cloud will always be properly signed.)
+# Python 2.7 requires ssl_security_context for self-signed.
+# Configurable in userify_config.py
+
 ssl_security_context = None
 if self_signed:
     try:
@@ -216,11 +237,29 @@ def https(method, path, data=""):
     # wasn't available until Python 2.5 (so shim won't
     # work on ancient versions of RHEL <= 5)
 
+    https_proxy, https_proxy_port = retrieve_https_proxy()
+    host = shim_host
+    host_port = 443
+
+    if https_proxy:
+        host = https_proxy
+        host_port = https_proxy_port
+
+    # ssl_security_context required for
+    # Userify Enterprise w/ self-signed certs
+    # and Python 2.7
+
     if ssl_security_context:
-        h = httplib.HTTPSConnection(shim_host, timeout=30,
-                context=ssl_security_context)
+        h = httplib.HTTPSConnection(
+            host, host_port, timeout=30,
+            context=ssl_security_context)
     else:
-        h = httplib.HTTPSConnection(shim_host, timeout=30)
+        h = httplib.HTTPSConnection(
+            host, host_port, timeout=30)
+
+    if https_proxy:
+        # Userify always runs on 443, even Enterprise:
+        h.set_tunnel(shim_host, 443)
 
     data = data or {}
     data.update(instance_metadata(ec2md))
@@ -308,7 +347,7 @@ if __name__ == "__main__":
     try:
         print
         print '-'*30
-        print "[shim] start: %s" % time.ctime()
+        print "[shim] %s start: %s" % (shim_version, time.ctime())
         s = time.time()
         try:
             time_to_wait = int(main())

@@ -51,15 +51,16 @@ shim_version = "01242016-1"
 # for the basis for the secure https_proxy code.
 
 def retrieve_https_proxy():
-    if not 'https_proxy' in os.environ:
-        return "", 443
-    https_proxy = os.environ['https_proxy'].strip()
-    if https_proxy and https_proxy.startswith("https://"):
-        https_proxy = https_proxy.split("https://")[1]
-        https_proxy_port = 443
-        if ":" in https_proxy:
-            https_proxy, https_proxy_port = https_proxy.split(":")
-            https_proxy_port = int(https_proxy_port)
+    https_proxy = ""
+    https_proxy_port = 443
+    if 'https_proxy' in os.environ:
+        https_proxy = os.environ['https_proxy'].strip()
+        if https_proxy.startswith("http"):
+            https_proxy = https_proxy.replace("https://","",1)
+            https_proxy = https_proxy.replace("http://","",1)
+            if ":" in https_proxy:
+                https_proxy, https_proxy_port = https_proxy.split(":")
+                https_proxy_port = int(https_proxy_port)
     return https_proxy, https_proxy_port
 
 # check for self_signed for Userify Enterprise.

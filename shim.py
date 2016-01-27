@@ -28,6 +28,7 @@ import urllib
 import random
 from pprint import pprint
 import socket
+import platform
 # catch stderr
 from subprocess import PIPE as pipe
 
@@ -44,7 +45,7 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "01242016-1"
+shim_version = "01272016-2"
 
 
 # huge thanks to Pundar Gunasekara at News Corp
@@ -206,7 +207,7 @@ def auth(id,key):
     return base64.b64encode(":".join((creds.api_id, creds.api_key)))
 
 def instance_metadata(keys):
-    # instance metadata feature (only for ec2)
+    # support instance metadata features
     d = {}
     h = httplib.HTTPConnection("169.254.169.254", timeout=.5)
     try:
@@ -217,6 +218,27 @@ def instance_metadata(keys):
                 d[k] = resp.read()
     except:
         pass
+    d['shim_version'] = shim_version 
+    try:
+        d['machine'] = platform.machine()
+        d['node'] = platform.node()
+        d['platform'] = platform.platform()
+        d['processor'] = platform.processor()
+        d['python_build'] = platform.python_build()
+        d['python_version'] = platform.python_version()
+        d['release'] = platform.release()
+        d['system'] = platform.system()
+        d['version'] = platform.version()
+        d['uname'] = platform.uname()
+        d['linux_distribution'] = platform.linux_distribution(supported_dists=(
+            'SuSE', 'debian', 'fedora', 'redhat', 'centos', 'mandrake', 'mandriva',
+            'rocks', 'slackware', 'yellowdog', 'gentoo', 'UnitedLinux', 'turbolinux',
+            'system'))
+        if d['linux_distribution'] == ('', '', ''):
+            d['issue'] = (open("/etc/issue").read() if
+                os.path.isfile("/etc/issue") else "")
+    except:
+        d['metadata_status'] = 'error'
     return d
 
 def get_ip():

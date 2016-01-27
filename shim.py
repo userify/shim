@@ -47,7 +47,7 @@ ec2md = ["instance-type", "hostname", "ami-id", "mac"]
 shim_version = "01242016-1"
 
 
-# huge thanks to Pundar Gunasekara at News Corp
+# huge thanks to Purinda Gunasekara at News Corp
 # for the basis for the secure https_proxy code.
 
 def retrieve_https_proxy():
@@ -60,7 +60,7 @@ def retrieve_https_proxy():
             https_proxy = https_proxy.replace("http://","",1)
             if ":" in https_proxy:
                 https_proxy, https_proxy_port = https_proxy.split(":")
-                https_proxy_port = int(https_proxy_port)
+                https_proxy_port = int(''.join(c for c in https_proxy_port if c.isdigit()))
     return https_proxy, https_proxy_port
 
 # check for self_signed for Userify Enterprise.
@@ -74,7 +74,7 @@ if self_signed:
         # fails on python < 2.6:
         import ssl
         # not avail in python < 2.7:
-        ssl_security_context = (hasattr(ssl, '_create_unverified_context') 
+        ssl_security_context = (hasattr(ssl, '_create_unverified_context')
             and ssl._create_unverified_context() or None)
     except:
         print "Self signed access attempted, but unable to open self-signed"

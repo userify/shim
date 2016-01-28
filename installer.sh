@@ -346,7 +346,8 @@ set -e
 echo
 echo "${PURPLE_TEXT}Finished. Userify shim has been completely installed."
 echo "/opt/userify/uninstall.sh as root to uninstall."
-echo "Please review first shim output in /var/log/userify-shim.log."
+echo "Enable debug=1 in /opt/userify/userify_config.py for extra verbosity."
+echo "Please review shim output in /var/log/userify-shim.log"
 # echo "(wait a few seconds..)"
 # echo ${BLUE_TEXT}
 # sleep 2
@@ -355,7 +356,9 @@ echo "Please review first shim output in /var/log/userify-shim.log."
 #     echo ${RED_TEXT}
 #     echo Unable to review userify-shim.log, please review it separately
 #     echo to ensure the shim is working properly.
-    echo i.e.,:  ${BLUE_TEXT}cat /var/log/userify-shim.log${RESET_TEXT}
+echo ${BLUE_TEXT}
+echo cat /var/log/userify-shim.log
+echo ${RESET_TEXT}
 # else
 #     echo $OUTPUT
 # fi

@@ -25,10 +25,11 @@ and only requires:
 *  HTTPS access to shim.userify.com (currently proxies are not supported)
 
 These basics are *built-in* to most Linux distributions made in the last five years,
-including Red Hat, Debian, Ubuntu, RHEL, CentOS, SUSE, Gentoo,
+including Red Hat, Debian, Ubuntu, RHEL, CentOS, OpenSUSE, Gentoo,
 and derivatives.
 
-Tested distributions: RHEL7, CentOS7, Debian 7 (wheezy) and later, Ubuntu 12.04 and later.  (Free integration support available.) Currently no BSD-based UNIX (incl OS X) is supported.
+Tested distributions: RHEL6, RHEL7, CentOS7, Amazon Linux, Ubuntu (min 10.04LTS), Debian (min 6).
+Although currently no BSD-based UNIX (incl OS X) is supported, we are looking forward to that soon.
 
 
 What does the installer do?

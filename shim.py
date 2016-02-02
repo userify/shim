@@ -45,7 +45,7 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "01272016-2"
+shim_version = "02022016-1"
 
 
 # huge thanks to Purinda Gunasekara at News Corp

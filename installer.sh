@@ -203,6 +203,7 @@ dry_run=0
 
 # Userify Enterprise/Pro licenses
 shim_host="$shim_host"
+static_host="$static_host"
 self_signed=$self_signed
 
 EOF
@@ -231,7 +232,7 @@ cat << "EOF" > /opt/userify/shim.sh
 
 # Copyright (c) 2016 Userify Corp.
 
-shim_host="shim.userify.com"
+static_host="static.userify.com"
 source /opt/userify/userify_config.py
 [ "x$self_signed" == "x1" ] && SELFSIGNED='k' || SELFSIGNED=''
 
@@ -244,16 +245,14 @@ chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-output=$(curl -f${SELFSIGNED}Ss https://$shim_host/shim.py | $PYTHON 2>&1)
+curl -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON >>/var/log/userify-shim.log 2>&1
 if [ $? != 0 ]; then
     # extra backoff in event of failure
     sleep $(($RANDOM%30+60))
 fi
-echo "$output" >> /var/log/userify-shim.log
 
-
-# a little extra fix for thundering herd
-sleep $(( ( $RANDOM % 10 )  + 5 ))
+# extra fix for thundering herd
+sleep $(( ( $RANDOM%10 )  + 5 ))
 
 
 # call myself. fork before exiting.

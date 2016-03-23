@@ -16,6 +16,7 @@ except:
 # Standard Library Imports
 import subprocess
 import os
+import hashlib
 import os.path
 import signal
 import httplib
@@ -25,10 +26,10 @@ import time
 import traceback
 import base64
 import urllib
-import random
 from pprint import pprint
 import socket
 import platform
+import tempfile
 # catch stderr
 from subprocess import PIPE as pipe
 
@@ -45,11 +46,65 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "02022016-1"
+shim_version = "03212016-1"
 
+
+def install_shim_runner():
+    "Updates or installs the shim.sh shim runner"
+    new_shim = """
+#! /bin/bash +e
+
+# --------------------------------------------
+#
+# shim.sh
+# Calls shim.py.
+#
+# --------------------------------------------
+
+# Copyright (c) 2016 Userify Corp.
+
+static_host="static.userify.com"
+source /opt/userify/userify_config.py
+[ "x$self_signed" == "x1" ] && SELFSIGNED='k' || SELFSIGNED=''
+
+# keep userify-shim.log from getting too big
+touch /var/log/userify-shim.log
+[[ $(find /var/log/userify-shim.log -type f -size +524288c 2>/dev/null) ]] && \
+    mv -f /var/log/userify-shim.log /var/log/userify-shim.log.1
+touch /var/log/userify-shim.log
+chmod -R 600 /var/log/userify-shim.log
+
+# kick off shim.py
+[ -z "$PYTHON" ] && PYTHON="$(which python)"
+curl -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON >>/var/log/userify-shim.log 2>&1
+
+if [ $? != 0 ]; then
+    # extra backoff in event of failure,
+    # randomized between one and seven minutes
+    sleep $(($RANDOM%360+60))
+fi
+
+sleep 5
+
+# call myself. fork before exiting.
+/opt/userify/shim.sh &
+"""
+    # avoid disk writes when possible
+    shim_runner = "/opt/userify/shim.sh"
+    md1 = hashlib.md5(new_shim).digest()
+    md2 = hashlib.md5(open(shim_runner).read()).digest()
+    if md1 == md2:
+        return
+    fd, tmpname = tempfile.mkstemp()
+    f = os.fdopen(fd, "wb")
+    f.write(new_shim)
+    f.close()
+    os.chmod(tmpname, 0o700)
+    # atomic overwrite only if no errors
+    os.rename(tmpname, shim_runner)
 
 # huge thanks to Purinda Gunasekara at News Corp
-# for the basis for the secure https_proxy code.
+# for secure https_proxy code updates.
 
 def retrieve_https_proxy():
     https_proxy = ""
@@ -197,6 +252,11 @@ def qexec(cmd):
         print "ERROR executing %s" % " ".join(cmd)
         print e
         print "Retrying.. (shim.sh)"
+    except:
+        traceback.print_exc()
+        print "ERROR executing %s" % " ".join(cmd)
+        print "Retrying.. (shim.sh)"
+
 
 def failsafe_mkdir(path):
     try: os.mkdir(path)
@@ -361,6 +421,7 @@ def main():
     if failure or "error" in configuration:
         return 3
     process_users(configuration["users"])
+    install_shim_runner()
     return configuration["shim-delay"] if "shim-delay" in configuration else 1
 
 

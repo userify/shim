@@ -239,21 +239,21 @@ source /opt/userify/userify_config.py
 # keep userify-shim.log from getting too big
 touch /var/log/userify-shim.log
 [[ $(find /var/log/userify-shim.log -type f -size +524288c 2>/dev/null) ]] && \
-    rm /var/log/userify-shim.log
+    mv -f /var/log/userify-shim.log /var/log/userify-shim.log.1
 touch /var/log/userify-shim.log
 chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
 curl -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON >>/var/log/userify-shim.log 2>&1
+
 if [ $? != 0 ]; then
-    # extra backoff in event of failure
-    sleep $(($RANDOM%30+60))
+    # extra backoff in event of failure,
+    # between one and seven minutes
+    sleep $(($RANDOM%360+60))
 fi
 
-# extra fix for thundering herd
-sleep $(( ( $RANDOM%10 )  + 5 ))
-
+sleep 5
 
 # call myself. fork before exiting.
 /opt/userify/shim.sh &
@@ -345,7 +345,7 @@ set -e
 echo
 echo "${PURPLE_TEXT}Finished. Userify shim has been completely installed."
 echo "/opt/userify/uninstall.sh as root to uninstall."
-echo "Enable debug=1 in /opt/userify/userify_config.py for extra verbosity."
+echo "debug=1 is enabled in /opt/userify/userify_config.py for extra verbosity."
 echo "Please review shim output in /var/log/userify-shim.log"
 # echo "(wait a few seconds..)"
 # echo ${BLUE_TEXT}

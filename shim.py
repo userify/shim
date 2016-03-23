@@ -248,7 +248,6 @@ def qexec(cmd):
     try:
         subprocess.check_call(cmd)
     except Exception, e:
-        traceback.print_exc()
         print "ERROR executing %s" % " ".join(cmd)
         print e
         print "Retrying.. (shim.sh)"

@@ -51,8 +51,7 @@ shim_version = "03212016-1"
 
 def install_shim_runner():
     "Updates or installs the shim.sh shim runner"
-    new_shim = """
-#! /bin/bash +e
+    new_shim = """#! /bin/bash +e
 
 # --------------------------------------------
 #
@@ -76,7 +75,7 @@ chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-curl -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON >>/var/log/userify-shim.log 2>&1
+curl -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u >>/var/log/userify-shim.log 2>&1
 
 if [ $? != 0 ]; then
     # extra backoff in event of failure,
@@ -88,7 +87,8 @@ sleep 5
 
 # call myself. fork before exiting.
 /opt/userify/shim.sh &
-"""
+""".strip()
+
     # avoid disk writes when possible
     shim_runner = "/opt/userify/shim.sh"
     md1 = hashlib.md5(new_shim).digest()
@@ -135,7 +135,7 @@ if self_signed:
     except:
         print "Self signed access attempted, but unable to open self-signed"
         print "security context. This Python may not support (or need) that."
-        raise
+        traceback.print_exc()
 
 
 # local_download = urllib.urlretrieve
@@ -268,16 +268,19 @@ def auth(id,key):
 def instance_metadata(keys):
     # support instance metadata features
     d = {}
-    h = httplib.HTTPConnection("169.254.169.254", timeout=.5)
     try:
-        for k in keys:
-            h.request("GET", "/latest/meta-data/%s" % k)
-            resp = h.getresponse()
-            if resp.status == 200:
-                d[k] = resp.read()
+        h = httplib.HTTPConnection("169.254.169.254", timeout=.5)
+    except:
+        h = None
+    try:
+        if h:
+            for k in keys:
+                h.request("GET", "/latest/meta-data/%s" % k)
+                resp = h.getresponse()
+                if resp.status == 200:
+                    d[k] = resp.read()
     except:
         pass
-    d['shim_version'] = shim_version 
     try:
         d['machine'] = platform.machine()
         d['node'] = platform.node()
@@ -345,6 +348,7 @@ def https(method, path, data=""):
 
     data = data or {}
     data.update(instance_metadata(ec2md))
+    data['shim_version'] = shim_version
     data = json.dumps(data)
 
     headers = {
@@ -436,16 +440,18 @@ if __name__ == "__main__":
             time_to_wait = int(main())
         except:
             traceback.print_exc()
-            time_to_wait = 3
+            time_to_wait = 300 + 60 * random.random()
         elapsed = time.time() - s
         print "[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s"
         if elapsed < time_to_wait:
             print "[shim] sleeping: %ss" % int(time_to_wait-elapsed)
             time.sleep(time_to_wait-elapsed)
     except:
-        time.sleep(3)
+        traceback.print_exc()
+        t = 300 + 60 * random.random()
+        print "[shim] sleeping: %ss" % int(t)
+        time.sleep(t)
         # display error to stdout
         # and attempt restart via shim.sh
-        raise
     print '-'*30
     print

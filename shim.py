@@ -46,7 +46,7 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "03212016-1"
+shim_version = "04012016-1"
 
 
 def install_shim_runner():
@@ -57,6 +57,7 @@ def install_shim_runner():
 #
 # shim.sh
 # Calls shim.py.
+# """ + shim_version + """
 #
 # --------------------------------------------
 

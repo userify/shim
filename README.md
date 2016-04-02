@@ -1,5 +1,5 @@
-shim
-====
+# shim ![](https://badge-size.herokuapp.com/userify/shim/master/shim.py)
+
 
 The Userify shim creates users, manages sudo permissions, etc based on
 the user accounts that you've configured in the Userify web console (https://console.userify.com)

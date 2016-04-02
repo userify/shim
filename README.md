@@ -1,4 +1,6 @@
-# shim [![](https://img.shields.io/badge/One%20Click%20Installer-yes-blue.svg](link=https://userify.com/tour/)
+# shim
+
+[Tour] (https://userify.com/tour/) [Sign Up] (https://dashboard.userify.com/#action=signup)
 
 The Userify shim creates users, manages sudo permissions, etc based on
 the user accounts that you've configured in the Userify web console (https://console.userify.com)

@@ -1,6 +1,6 @@
 # Userify Shim
 ### Open Source agent for the Userify EC2 SSH Key Manager
-### Customizable deployment for enterprise datacenters and the cloud
+#### Customizable deployment for enterprise datacenters and the cloud
 
 [Tour] (https://userify.com/tour/)  ·   [Sign Up] (https://dashboard.userify.com/#action=signup)
 

@@ -1,4 +1,4 @@
-# Userify Shim <img src="https://userify.com/logo-blue-on-white.png" align="right">
+# Userify Shim <a href=https://userify.com/><img src="https://userify.com/logo-blue-on-white.png" align="right"></a>
 ### Open Source agent for the Userify EC2 SSH Key Manager
 #### Customizable deployment for enterprise datacenters and the cloud
 

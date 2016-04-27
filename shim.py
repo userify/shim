@@ -65,6 +65,7 @@ def install_shim_runner():
 # Copyright (c) 2016 Userify Corp.
 
 static_host="static.userify.com"
+touch /opt/userify/userify_config.py
 source /opt/userify/userify_config.py
 [ "x$self_signed" == "x1" ] && SELFSIGNED='k' || SELFSIGNED=''
 
@@ -449,7 +450,9 @@ if __name__ == "__main__":
             print "[shim] sleeping: %ss" % int(time_to_wait-elapsed)
             time.sleep(time_to_wait-elapsed)
     except:
+        print '-'*30
         traceback.print_exc()
+        print '-'*30
         t = 300 + 60 * random.random()
         print "[shim] sleeping: %ss" % int(t)
         time.sleep(t)

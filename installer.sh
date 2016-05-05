@@ -144,7 +144,8 @@ sed -i "s/\/opt\/userify\/shim.sh \&//" \
 rm -Rf /opt/userify/
 
 # Kill off remaining shim processes
-killall shim.py shim.sh >/dev/null 2>&1
+# some Linux distros do not have killall:
+pkill shim. > /dev/null 2>&1
 
 echo [32m
 

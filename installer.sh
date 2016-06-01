@@ -96,7 +96,7 @@ ${RED_TEXT}before continuing.${RESET_TEXT}" >&2
 
 
 echo "${GREEN_TEXT}Creating Userify directory (/opt/userify/)${RESET_TEXT}"
-mkdir /opt/userify/ || (
+mkdir -p /opt/userify/ || (
     echo "${RED_TEXT}Unable to create directory /opt/userify.${RESET_TEXT}" >&2
     exit 1
 )

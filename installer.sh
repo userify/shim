@@ -195,7 +195,7 @@ EOF
 # are loadable by each.
 
 # Enable this for additional verbosity in /var/log/userify-shim.log
-debug=1
+debug=0
 
 # Enable this to not actually make changes.
 # This can also be used to temporary disable the shim.

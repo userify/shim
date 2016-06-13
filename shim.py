@@ -31,7 +31,6 @@ from pprint import pprint
 import socket
 import platform
 import tempfile
-import uuid
 # catch stderr
 from subprocess import PIPE as pipe
 line_spacer = '*' * 30

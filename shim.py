@@ -109,7 +109,7 @@ sleep 5
         md2 = hashlib.md5(open(shim_runner).read()).digest()
         if md1 == md2:
             return
-        fd, tmpname = tempfile.mkstemp()
+        fd, tmpname = tempfile.mkstemp(dir="/opt/userify/")
         f = os.fdopen(fd, "wb")
         f.write(new_shim)
         f.close()

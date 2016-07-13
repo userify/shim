@@ -16,8 +16,10 @@ except:
 # Standard Library Imports
 import subprocess
 import os
+import hashlib
 import os.path
 import signal
+import random
 import httplib
 import sys
 import datetime
@@ -25,12 +27,13 @@ import time
 import traceback
 import base64
 import urllib
-import random
 from pprint import pprint
 import socket
 import platform
+import tempfile
 # catch stderr
 from subprocess import PIPE as pipe
+line_spacer = '*' * 30
 
 sys.path.append("/opt/userify")
 import creds
@@ -45,11 +48,79 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "02022016-1"
+shim_version = "04012016-1"
 
+
+# begin long-running shim processing
+server_rsa_public_key = ""
+f = "/etc/ssh/ssh_host_rsa_key.pub"
+try:
+    server_rsa_public_key = open(f).read()
+except Exception, e:
+    print "Unable to read %s: %s" % (f,e)
+
+
+def install_shim_runner():
+    "Updates or installs the shim.sh shim runner"
+    new_shim = """#! /bin/bash +e
+
+# --------------------------------------------
+#
+# shim.sh
+# Calls shim.py.
+# """ + shim_version + """
+#
+# --------------------------------------------
+
+# Copyright (c) 2016 Userify Corp.
+
+static_host="static.userify.com"
+touch /opt/userify/userify_config.py
+source /opt/userify/userify_config.py
+[ "x$self_signed" == "x1" ] && SELFSIGNED='k' || SELFSIGNED=''
+
+# keep userify-shim.log from getting too big
+touch /var/log/userify-shim.log
+[[ $(find /var/log/userify-shim.log -type f -size +524288c 2>/dev/null) ]] && \
+    mv -f /var/log/userify-shim.log /var/log/userify-shim.log.1
+touch /var/log/userify-shim.log
+chmod -R 600 /var/log/userify-shim.log
+
+# kick off shim.py
+[ -z "$PYTHON" ] && PYTHON="$(which python)"
+curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u >>/var/log/userify-shim.log 2>&1
+
+if [ $? != 0 ]; then
+    # extra backoff in event of failure,
+    # randomized between one and seven minutes
+    sleep $(($RANDOM%360+60))
+fi
+
+sleep 5
+
+# call myself. fork before exiting.
+/opt/userify/shim.sh &
+""".strip()
+
+    try:
+        # avoid disk writes when possible
+        shim_runner = "/opt/userify/shim.sh"
+        md1 = hashlib.md5(new_shim).digest()
+        md2 = hashlib.md5(open(shim_runner).read()).digest()
+        if md1 == md2:
+            return
+        fd, tmpname = tempfile.mkstemp(dir="/opt/userify/")
+        f = os.fdopen(fd, "wb")
+        f.write(new_shim)
+        f.close()
+        os.chmod(tmpname, 0o700)
+        # atomic overwrite only if no errors
+        os.rename(tmpname, shim_runner)
+    except Exception, e:
+        print "Unable to update shim.sh: %s" % e
 
 # huge thanks to Purinda Gunasekara at News Corp
-# for the basis for the secure https_proxy code.
+# for secure https_proxy code updates.
 
 def retrieve_https_proxy():
     https_proxy = ""
@@ -80,7 +151,7 @@ if self_signed:
     except:
         print "Self signed access attempted, but unable to open self-signed"
         print "security context. This Python may not support (or need) that."
-        raise
+        traceback.print_exc()
 
 
 # local_download = urllib.urlretrieve
@@ -193,10 +264,14 @@ def qexec(cmd):
     try:
         subprocess.check_call(cmd)
     except Exception, e:
-        traceback.print_exc()
         print "ERROR executing %s" % " ".join(cmd)
         print e
         print "Retrying.. (shim.sh)"
+    except:
+        traceback.print_exc()
+        print "ERROR executing %s" % " ".join(cmd)
+        print "Retrying.. (shim.sh)"
+
 
 def failsafe_mkdir(path):
     try: os.mkdir(path)
@@ -209,16 +284,20 @@ def auth(id,key):
 def instance_metadata(keys):
     # support instance metadata features
     d = {}
-    h = httplib.HTTPConnection("169.254.169.254", timeout=.5)
+    d['server_rsa_public_key'] = server_rsa_public_key
     try:
-        for k in keys:
-            h.request("GET", "/latest/meta-data/%s" % k)
-            resp = h.getresponse()
-            if resp.status == 200:
-                d[k] = resp.read()
+        h = httplib.HTTPConnection("169.254.169.254", timeout=.5)
+        if h:
+            for k in keys:
+                try:
+                    h.request("GET", "/latest/meta-data/%s" % k)
+                    resp = h.getresponse()
+                    if resp.status == 200:
+                        d[k] = resp.read()
+                except:
+                    pass
     except:
         pass
-    d['shim_version'] = shim_version 
     try:
         d['machine'] = platform.machine()
         d['node'] = platform.node()
@@ -230,13 +309,17 @@ def instance_metadata(keys):
         d['system'] = platform.system()
         d['version'] = platform.version()
         d['uname'] = platform.uname()
-        d['linux_distribution'] = platform.linux_distribution(supported_dists=(
-            'SuSE', 'debian', 'fedora', 'redhat', 'centos', 'mandrake', 'mandriva',
-            'rocks', 'slackware', 'yellowdog', 'gentoo', 'UnitedLinux', 'turbolinux',
-            'system'))
-        if d['linux_distribution'] == ('', '', ''):
-            d['issue'] = (open("/etc/issue").read() if
-                os.path.isfile("/etc/issue") else "")
+        d['linux_distribution'] = platform.linux_distribution(
+            supported_dists=(
+                'SuSE', 'debian', 'fedora', 'redhat', 'centos', 'mandrake',
+                'mandriva', 'rocks', 'slackware', 'yellowdog', 'gentoo',
+                'UnitedLinux', 'turbolinux', 'system'))
+        try:
+            if d['linux_distribution'] == ('', '', ''):
+                d['issue'] = (open("/etc/issue").read()[:80] if
+                    os.path.isfile("/etc/issue") else "")
+        except:
+            pass
     except:
         d['metadata_status'] = 'error'
     return d
@@ -286,6 +369,8 @@ def https(method, path, data=""):
 
     data = data or {}
     data.update(instance_metadata(ec2md))
+    pprint(data)
+    data['shim_version'] = shim_version
     data = json.dumps(data)
 
     headers = {
@@ -293,7 +378,18 @@ def https(method, path, data=""):
         "Authorization": "Basic " + auth(creds.api_id, creds.api_key),
         "X-Local-IP": get_ip()
     }
-    h.request(method, path, data, headers)
+    try:
+        h.request(method, path, data, headers)
+    except:
+        print line_spacer
+        traceback.print_exc()
+        print line_spacer
+        t = 300 + 60 * random.random()
+        print "[shim] sleeping: %ss" % int(t)
+        time.sleep(t)
+        # display error to stdout
+        # and attempt restart via shim.sh
+
     return h
 
 
@@ -361,6 +457,7 @@ def main():
     if failure or "error" in configuration:
         return 3
     process_users(configuration["users"])
+    install_shim_runner()
     return configuration["shim-delay"] if "shim-delay" in configuration else 1
 
 
@@ -369,23 +466,27 @@ app = {}
 if __name__ == "__main__":
     try:
         print
-        print '-'*30
+        print line_spacer
         print "[shim] %s start: %s" % (shim_version, time.ctime())
         s = time.time()
         try:
             time_to_wait = int(main())
         except:
             traceback.print_exc()
-            time_to_wait = 3
+            time_to_wait = 300 + 60 * random.random()
         elapsed = time.time() - s
         print "[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s"
         if elapsed < time_to_wait:
             print "[shim] sleeping: %ss" % int(time_to_wait-elapsed)
             time.sleep(time_to_wait-elapsed)
-    except:
-        time.sleep(3)
+    except Exception, e:
+        print line_spacer
+        print "Error: %s" % e
+        print line_spacer
+        t = 300 + 60 * random.random()
+        print "[shim] sleeping: %ss" % int(t)
+        time.sleep(t)
         # display error to stdout
         # and attempt restart via shim.sh
-        raise
-    print '-'*30
+    print line_spacer
     print

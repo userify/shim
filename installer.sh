@@ -96,7 +96,7 @@ ${RED_TEXT}before continuing.${RESET_TEXT}" >&2
 
 
 echo "${GREEN_TEXT}Creating Userify directory (/opt/userify/)${RESET_TEXT}"
-mkdir /opt/userify/ || (
+mkdir -p /opt/userify/ || (
     echo "${RED_TEXT}Unable to create directory /opt/userify.${RESET_TEXT}" >&2
     exit 1
 )
@@ -144,7 +144,7 @@ sed -i "s/\/opt\/userify\/shim.sh \&//" \
 rm -Rf /opt/userify/
 
 # Kill off remaining shim processes
-killall shim.py shim.sh >/dev/null 2>&1
+pkill shim. > /dev/null 2>&1
 
 echo [32m
 
@@ -195,7 +195,7 @@ EOF
 # are loadable by each.
 
 # Enable this for additional verbosity in /var/log/userify-shim.log
-debug=1
+debug=0
 
 # Enable this to not actually make changes.
 # This can also be used to temporary disable the shim.
@@ -239,21 +239,21 @@ source /opt/userify/userify_config.py
 # keep userify-shim.log from getting too big
 touch /var/log/userify-shim.log
 [[ $(find /var/log/userify-shim.log -type f -size +524288c 2>/dev/null) ]] && \
-    rm /var/log/userify-shim.log
+    mv -f /var/log/userify-shim.log /var/log/userify-shim.log.1
 touch /var/log/userify-shim.log
 chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-curl -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON >>/var/log/userify-shim.log 2>&1
+curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u >>/var/log/userify-shim.log 2>&1
+
 if [ $? != 0 ]; then
-    # extra backoff in event of failure
-    sleep $(($RANDOM%30+60))
+    # extra backoff in event of failure,
+    # between one and seven minutes
+    sleep $(($RANDOM%360+60))
 fi
 
-# extra fix for thundering herd
-sleep $(( ( $RANDOM%10 )  + 5 ))
-
+sleep 5
 
 # call myself. fork before exiting.
 /opt/userify/shim.sh &
@@ -338,14 +338,14 @@ chmod +x /etc/rc.d/rc.local 2>/dev/null
 
 echo "${GREEN_TEXT}Launching shim.sh${RESET_TEXT}"
 set +e;
-killall shim.py shim.sh 2>/dev/null
+pkill shim. 2>/dev/null
 set -e
 /opt/userify/shim.sh &
 
 echo
 echo "${PURPLE_TEXT}Finished. Userify shim has been completely installed."
 echo "/opt/userify/uninstall.sh as root to uninstall."
-echo "Enable debug=1 in /opt/userify/userify_config.py for extra verbosity."
+echo "debug=1 is enabled in /opt/userify/userify_config.py for extra verbosity."
 echo "Please review shim output in /var/log/userify-shim.log"
 # echo "(wait a few seconds..)"
 # echo ${BLUE_TEXT}

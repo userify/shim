@@ -267,10 +267,6 @@ def qexec(cmd):
         print "ERROR executing %s" % " ".join(cmd)
         print e
         print "Retrying.. (shim.sh)"
-    except:
-        traceback.print_exc()
-        print "ERROR executing %s" % " ".join(cmd)
-        print "Retrying.. (shim.sh)"
 
 
 def failsafe_mkdir(path):
@@ -369,7 +365,7 @@ def https(method, path, data=""):
 
     data = data or {}
     data.update(instance_metadata(ec2md))
-    pprint(data)
+    # pprint(data)
     data['shim_version'] = shim_version
     data = json.dumps(data)
 
@@ -380,9 +376,10 @@ def https(method, path, data=""):
     }
     try:
         h.request(method, path, data, headers)
-    except:
+    except Exception, e:
         print line_spacer
-        traceback.print_exc()
+        print "Error: %s" % e
+        # traceback.print_exc()
         print line_spacer
         t = 300 + 60 * random.random()
         print "[shim] sleeping: %ss" % int(t)
@@ -424,15 +421,27 @@ def remove_user(username, permanent=False):
 def process_users(good_users):
     for username, user in good_users.iteritems():
         if username not in current_usernames():
-            useradd(user["name"], username, user["preferred_shell"])
+            try:
+                useradd(user["name"], username, user["preferred_shell"])
+            except Exception, e:
+                print "Unable to add user %s: %s" % (username, e)
         if "ssh_public_key" in user:
-            sshkey_add(username, user["ssh_public_key"])
-        sudoers_add(username, user["perm"])
+            try:
+                sshkey_add(username, user["ssh_public_key"])
+            except Exception, e:
+                print "Unable to add SSH key for user %s: %s" % (username, e)
+        try:
+            sudoers_add(username, user["perm"])
+        except Exception, e:
+            print "Unable to configure sudo for user %s: %s" % (username, e)
     for userrow in current_userify_users():
         username = userrow[0]
         if username not in good_users.keys():
             print "[shim] removing" + username
-            remove_user(username)
+            try:
+                remove_user(username)
+            except Exception, e:
+                print "Unable to remove user %s: %s" % (username, e)
 
 
 def main():
@@ -445,15 +454,20 @@ def main():
         print response.status, response.reason
         pprint(text)
     configuration = {"error": "Unknown error parsing configuration"}
+    if failure:
+        return 3
     try:
         configuration = json.loads(text)
         if debug or failure:
             pprint(configuration)
         if failure and "error" in configuration:
             print "\n", response.reason.upper(), configuration["error"]
-    except:
+    except Exception, e:
         failure = True
-        traceback.print_exc()
+        print line_spacer
+        print "Error: %s" % e
+        # traceback.print_exc()
+        print line_spacer
     if failure or "error" in configuration:
         return 3
     process_users(configuration["users"])

@@ -471,9 +471,12 @@ if __name__ == "__main__":
         s = time.time()
         try:
             time_to_wait = int(main())
-        except:
-            traceback.print_exc()
-            time_to_wait = 300 + 60 * random.random()
+        except Exception, e:
+            print line_spacer
+            print "Error: %s" % e
+            print line_spacer
+            # traceback.print_exc()
+            time_to_wait = 30 + 60 * random.random()
         elapsed = time.time() - s
         print "[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s"
         if elapsed < time_to_wait:
@@ -483,7 +486,7 @@ if __name__ == "__main__":
         print line_spacer
         print "Error: %s" % e
         print line_spacer
-        t = 300 + 60 * random.random()
+        t = 30 + 60 * random.random()
         print "[shim] sleeping: %ss" % int(t)
         time.sleep(t)
         # display error to stdout

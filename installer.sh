@@ -180,6 +180,9 @@ if [ -z "$self_signed" ]; then self_signed="0"; fi
 # in a different company, by replacing these with the credentials for the new
 # server group.
 
+company = "$company_name"
+project = "$project_name"
+
 api_id = "$api_id"
 api_key = "$api_key"
 
@@ -190,6 +193,9 @@ EOF
 
     cat <<EOF >> /opt/userify/userify_config.py
 # Userify Shim Configuration
+
+company="$company_name"
+project="$project_name"
 
 # This file sourced by both Python and Bash scripts, so please ensure changes
 # are loadable by each.

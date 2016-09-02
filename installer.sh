@@ -37,6 +37,7 @@ export RESET_TEXT="[0m"
 # for use only with Enterprise/Pro:
 export SELFSIGNED="$1"
 
+clear
 
 # Install Python on distributions that might be missing it.
 set +e
@@ -44,10 +45,14 @@ set +e
 if [ ! $(which python) ]; then
     if [ $(which apt) ]; then
         echo "Installing Python with apt-get"
-        sudo apt-get -qqy python
+        sudo apt-get -qqy python 2>/dev/null
+        sudo apt-get -qqy python-minimal 2>/dev/null
     elif [ $(which yum) ]; then
         echo "Installing Python with yum."
         sudo yum install -y python
+    elif [ $(which dnf) ]; then
+        echo "Installing Python with dnf"
+        sudo dnf install -y python
     else
         set -e
         echo "Unable to install Python (2.6, 2.7). Please contact Userify support for assistance."
@@ -56,8 +61,6 @@ if [ ! $(which python) ]; then
 fi
 
 
-
-clear
 cat << EOF
    
              ${BLUE_TEXT}            _--_

@@ -163,9 +163,10 @@ def userdel(username, permanent=False):
     if not permanent:
         if os.path.isdir(removed_dir):
             qexec(["/bin/rm", "-Rf", removed_dir])
-        # Debian:
+        # try multiple pkill formats until one works
+        # Debian, Ubuntu:
         qexec(["/usr/bin/pkill", "--signal", "9", "-u", username])
-        # RHEL:
+        # RHEL, CentOS, and Amazon Linux:
         qexec(["/usr/bin/pkill", "-9", "-u", username])
         qexec(["/usr/sbin/userdel", username])
         qexec(["/bin/mv", home_dir, removed_dir])

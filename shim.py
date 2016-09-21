@@ -456,7 +456,7 @@ def main():
         pprint(text)
     configuration = {"error": "Unknown error parsing configuration"}
     if failure:
-        return 3
+        return 30 + 60 * random.random()
     try:
         configuration = json.loads(text)
         if debug or failure:

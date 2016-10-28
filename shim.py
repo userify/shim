@@ -35,6 +35,7 @@ import tempfile
 from subprocess import PIPE as pipe
 line_spacer = '*' * 30
 
+socket.setdefaulttimeout(5)
 sys.path.append("/opt/userify")
 import creds
 
@@ -354,11 +355,11 @@ def https(method, path, data=""):
 
     if ssl_security_context:
         h = httplib.HTTPSConnection(
-            host, host_port, timeout=30,
+            host, host_port, timeout=15,
             context=ssl_security_context)
     else:
         h = httplib.HTTPSConnection(
-            host, host_port, timeout=30)
+            host, host_port, timeout=15)
 
     if https_proxy:
         # Userify always runs on 443, even Enterprise:
@@ -448,6 +449,7 @@ def process_users(good_users):
 def main():
     parse_passwd()
     h = https("POST", "/api/userify/configure")
+    h.sock.settimeout(10)
     response = h.getresponse()
     text = response.read()
     failure = response.status != 200

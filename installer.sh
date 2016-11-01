@@ -274,7 +274,7 @@ chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u 2>&1 |tee --append - /var/log/userify-shim.log
+curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u 2>&1 >> /var/log/userify-shim.log
 
 if [ $? != 0 ]; then
     # extra backoff in event of failure,

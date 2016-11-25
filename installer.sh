@@ -45,11 +45,12 @@ set +e
 if [ ! $(which python) ]; then
     if [ $(which apt) ]; then
         echo "Installing Python with apt-get"
-        sudo apt-get -qqy install python 2>/dev/null
-        sudo apt-get -qqy install python-minimal 2>/dev/null
+        sudo apt-get update >/dev/null
+        sudo apt-get -qqy install python >/dev/null
+        sudo apt-get -qqy install python-minimal >/dev/null
     elif [ $(which yum) ]; then
         echo "Installing Python with yum."
-        sudo yum install -y python
+        sudo yum install -y python >/dev/null
     elif [ $(which dnf) ]; then
         echo "Installing Python with dnf"
         sudo dnf install -y python

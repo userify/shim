@@ -365,17 +365,21 @@ def https(method, path, data=""):
         # Userify always runs on 443, even Enterprise:
         h.set_tunnel(shim_host, 443)
 
-    data = data or {}
-    data.update(instance_metadata(ec2md))
-    # pprint(data)
-    data['shim_version'] = shim_version
-    data = json.dumps(data)
 
     headers = {
         "Accept": "text/plain, */json",
         "Authorization": "Basic " + auth(creds.api_id, creds.api_key),
         "X-Local-IP": get_ip()
     }
+
+    data = data or {}
+    data.update(instance_metadata(ec2md))
+    data["hostname"] = str(socket.gethostname()) or headers["X-Local-IP"]
+
+    # pprint(data)
+    data['shim_version'] = shim_version
+    data = json.dumps(data)
+
     try:
         h.request(method, path, data, headers)
     except Exception, e:
@@ -475,6 +479,25 @@ def main():
         return 3
     process_users(configuration["users"])
     install_shim_runner()
+
+    # set hostname if set on server
+    if "hostname" in configuration:
+        try:
+            hostname = str(configuration["hostname"])
+            if socket.gethostname() != hostname:
+                socket.sethostname(hostname)
+                open("/etc/hostname", "w").write(hostname + "\n")
+                # should set in /etc/hosts as well so
+                # that sudo doesn't complain
+                hosts = open("/etc/hosts").read().split("\n")
+                line = "127.0.0.1 " + hostname + " # set by userify shim"
+                if line not in hosts:
+                    hosts.insert(1, line)
+                    open("/etc/hosts", "w").write("\n").join(hosts)
+        except Exception, e
+            print "Unable to set hostname: %s" % e
+            pass
+
     return configuration["shim-delay"] if "shim-delay" in configuration else 1
 
 

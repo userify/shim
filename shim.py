@@ -494,9 +494,8 @@ def main():
                 if line not in hosts:
                     hosts.insert(1, line)
                     open("/etc/hosts", "w").write("\n").join(hosts)
-        except Exception, e
+        except Exception, e:
             print "Unable to set hostname: %s" % e
-            pass
 
     return configuration["shim-delay"] if "shim-delay" in configuration else 1
 

@@ -453,7 +453,7 @@ def process_users(good_users):
 def main():
     parse_passwd()
     h = https("POST", "/api/userify/configure")
-    h.sock.settimeout(10)
+    h.sock.settimeout(60)
     response = h.getresponse()
     text = response.read()
     failure = response.status != 200

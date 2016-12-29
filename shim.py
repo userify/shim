@@ -191,6 +191,9 @@ def useradd(name, username, preferred_shell):
     else:
         useradd_suffix = "-m"
     cmd = ["/usr/sbin/useradd", useradd_suffix,
+        # UsePAM no should be in /etc/ssh/sshd_config
+        # always disable password (impossible to login using password):
+        "--disabled-password",
         "--comment", "userify-" + name,
         "-s", preferred_shell if preferred_shell else "/bin/bash",
         "--user-group", username]

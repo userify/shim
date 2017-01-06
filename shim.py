@@ -431,15 +431,15 @@ def process_users(good_users):
                 useradd(user["name"], username, user["preferred_shell"])
             except Exception, e:
                 print "Unable to add user %s: %s" % (username, e)
-        if "ssh_public_key" in user:
+            if "ssh_public_key" in user:
+                try:
+                    sshkey_add(username, user["ssh_public_key"])
+                except Exception, e:
+                    print "Unable to add SSH key for user %s: %s" % (username, e)
             try:
-                sshkey_add(username, user["ssh_public_key"])
+                sudoers_add(username, user["perm"])
             except Exception, e:
-                print "Unable to add SSH key for user %s: %s" % (username, e)
-        try:
-            sudoers_add(username, user["perm"])
-        except Exception, e:
-            print "Unable to configure sudo for user %s: %s" % (username, e)
+                print "Unable to configure sudo for user %s: %s" % (username, e)
     for userrow in current_userify_users():
         username = userrow[0]
         if username not in good_users.keys():

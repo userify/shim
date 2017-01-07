@@ -33,7 +33,7 @@ import platform
 import tempfile
 # catch stderr
 from subprocess import PIPE as pipe
-line_spacer = '*' * 30
+line_spacer = "\n" + "*" * 30
 
 socket.setdefaulttimeout(5)
 sys.path.append("/opt/userify")
@@ -58,7 +58,7 @@ f = "/etc/ssh/ssh_host_rsa_key.pub"
 try:
     server_rsa_public_key = open(f).read()
 except Exception, e:
-    print "Unable to read %s: %s" % (f,e)
+    print ("Unable to read %s: %s" % (f,e))
 
 
 def install_shim_runner():
@@ -118,7 +118,7 @@ sleep 5
         # atomic overwrite only if no errors
         os.rename(tmpname, shim_runner)
     except Exception, e:
-        print "Unable to update shim.sh: %s" % e
+        print ("Unable to update shim.sh: %s" % e)
 
 # huge thanks to Purinda Gunasekara at News Corp
 # for secure https_proxy code updates.
@@ -150,8 +150,8 @@ if self_signed:
         ssl_security_context = (hasattr(ssl, '_create_unverified_context')
             and ssl._create_unverified_context() or None)
     except:
-        print "Self signed access attempted, but unable to open self-signed"
-        print "security context. This Python may not support (or need) that."
+        print ("Self signed access attempted, but unable to open self-signed" +
+               " security context. This Python may not support (or need) that.")
         traceback.print_exc()
 
 
@@ -180,7 +180,7 @@ def useradd(name, username, preferred_shell):
     home_dir = "/home/" + username
 
     if dry_run:
-        print "DRY RUN: Adding user ", name, username, preferred_shell
+        print ("DRY RUN: Adding user %s %s %s " % (name, username, preferred_shell))
         return
 
     # restore removed home directory
@@ -205,7 +205,7 @@ def sudoers_add(username, perm=""):
     text = sudoerstext(username, perm)
 
     if dry_run:
-        print "DRY RUN: Adding sudoers: ", fname, text
+        print ("DRY RUN: Adding sudoers: %s %s" % (fname, text))
         return
 
     if perm:
@@ -243,7 +243,7 @@ def sshkey_add(username, ssh_public_key=""):
     sshpath = userpath + "/.ssh/"
 
     if dry_run:
-        print "DRY RUN: Adding user ssh key", sshpath, ssh_public_key
+        print ("DRY RUN: Adding user ssh key %s %s" % (sshpath, ssh_public_key))
         return
 
     failsafe_mkdir(sshpath)
@@ -263,13 +263,13 @@ def fullchmod(mode, path):
 
 
 def qexec(cmd):
-    print "[shim] exec: \"" + " ".join(cmd) + '"'
+    print ("[shim] exec: \"" + " ".join(cmd) + '"')
     try:
         subprocess.check_call(cmd)
     except Exception, e:
-        print "ERROR executing %s" % " ".join(cmd)
-        print e
-        print "Retrying.. (shim.sh)"
+        print ("ERROR executing %s" % " ".join(cmd))
+        print (e)
+        print ("Retrying.. (shim.sh)")
 
 
 def failsafe_mkdir(path):
@@ -384,12 +384,12 @@ def https(method, path, data=""):
     try:
         h.request(method, path, data, headers)
     except Exception, e:
-        print line_spacer
-        print "Error: %s" % e
+        print (line_spacer)
+        print ("Error: %s" % e)
         # traceback.print_exc()
-        print line_spacer
+        print (line_spacer)
         t = 300 + 60 * random.random()
-        print "[shim] sleeping: %ss" % int(t)
+        print ("[shim] sleeping: %ss" % int(t))
         time.sleep(t)
         # display error to stdout
         # and attempt restart via shim.sh
@@ -417,7 +417,7 @@ def current_userify_users():
 def remove_user(username, permanent=False):
     # completely removes user
     if dry_run:
-        print "DRY RUN: Removing user: ", username, "permanently:", permanent
+        print ("DRY RUN: Removing user: %s permanently: %s"% (username, permanent))
         return
     try: userdel(username, permanent)
     except: pass
@@ -431,24 +431,24 @@ def process_users(good_users):
             try:
                 useradd(user["name"], username, user["preferred_shell"])
             except Exception, e:
-                print "Unable to add user %s: %s" % (username, e)
+                print ("Unable to add user %s: %s" % (username, e))
             if "ssh_public_key" in user:
                 try:
                     sshkey_add(username, user["ssh_public_key"])
                 except Exception, e:
-                    print "Unable to add SSH key for user %s: %s" % (username, e)
+                    print ("Unable to add SSH key for user %s: %s" % (username, e))
             try:
                 sudoers_add(username, user["perm"])
             except Exception, e:
-                print "Unable to configure sudo for user %s: %s" % (username, e)
+                print ("Unable to configure sudo for user %s: %s" % (username, e))
     for userrow in current_userify_users():
         username = userrow[0]
         if username not in good_users.keys():
-            print "[shim] removing" + username
+            print ("[shim] removing" + username)
             try:
                 remove_user(username)
             except Exception, e:
-                print "Unable to remove user %s: %s" % (username, e)
+                print ("Unable to remove user %s: %s" % (username, e))
 
 
 def main():
@@ -459,7 +459,7 @@ def main():
     text = response.read()
     failure = response.status != 200
     if debug or failure:
-        print response.status, response.reason
+        print ("%s %s" % (response.status, response.reason))
         pprint(text)
     configuration = {"error": "Unknown error parsing configuration"}
     if failure:
@@ -469,13 +469,13 @@ def main():
         if debug or failure:
             pprint(configuration)
         if failure and "error" in configuration:
-            print "\n", response.reason.upper(), configuration["error"]
+            print ("\n %s %s" % (response.reason.upper(), configuration["error"]))
     except Exception, e:
         failure = True
-        print line_spacer
-        print "Error: %s" % e
+        print (line_spacer)
+        print ("Error: %s" % e)
         # traceback.print_exc()
-        print line_spacer
+        print (line_spacer)
     if failure or "error" in configuration:
         return 3
     process_users(configuration["users"])
@@ -496,7 +496,7 @@ def main():
                     hosts.insert(1, line)
                     open("/etc/hosts", "w").write("\n").join(hosts)
         except Exception, e:
-            print "Unable to set hostname: %s" % e
+            print ("Unable to set hostname: %s" % e)
 
     return configuration["shim-delay"] if "shim-delay" in configuration else 1
 
@@ -505,31 +505,28 @@ def main():
 app = {}
 if __name__ == "__main__":
     try:
-        print
-        print line_spacer
-        print "[shim] %s start: %s" % (shim_version, time.ctime())
+        print (line_spacer)
+        print ("[shim] %s start: %s" % (shim_version, time.ctime()))
         s = time.time()
         try:
             time_to_wait = int(main())
         except Exception, e:
-            print line_spacer
-            print "Error: %s" % e
-            print line_spacer
+            print (line_spacer)
+            print ("Error: %s" % e)
+            print (line_spacer)
             # traceback.print_exc()
             time_to_wait = 30 + 60 * random.random()
         elapsed = time.time() - s
-        print "[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s"
+        print ("[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s")
         if elapsed < time_to_wait:
-            print "[shim] sleeping: %ss" % int(time_to_wait-elapsed)
+            print ("[shim] sleeping: %ss" % int(time_to_wait-elapsed))
             time.sleep(time_to_wait-elapsed)
     except Exception, e:
-        print line_spacer
-        print "Error: %s" % e
-        print line_spacer
+        print (line_spacer)
+        print ("Error: %s" % e)
+        print (line_spacer)
         t = 30 + 60 * random.random()
-        print "[shim] sleeping: %ss" % int(t)
+        print ("[shim] sleeping: %ss" % int(t))
         time.sleep(t)
         # display error to stdout
         # and attempt restart via shim.sh
-    print line_spacer
-    print

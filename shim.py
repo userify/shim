@@ -441,6 +441,8 @@ def process_users(good_users):
                 sudoers_add(username, user["perm"])
             except Exception, e:
                 print ("Unable to configure sudo for user %s: %s" % (username, e))
+        else:
+            print ("ERROR: username %s conflicts with an existing user on the system." % username)
     for userrow in current_userify_users():
         username = userrow[0]
         if username not in good_users.keys():

@@ -406,7 +406,7 @@ def parse_passwd():
     app["passwd"] = [i if len(i)>6 else i.append("") for i in app["passwd"]]
 
 
-def current_usernames():
+def system_usernames():
     return [user[0] for user in app["passwd"]]
 
 
@@ -429,7 +429,7 @@ def remove_user(username, permanent=False):
 def process_users(defined_users):
     for username, user in defined_users.iteritems():
         if username not in current_userify_users():
-            if username in current_usernames():
+            if username in system_usernames():
                 print ("ERROR: username %s conflicts with an existing user on the system." % username)
             else:
                 try:

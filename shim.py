@@ -173,6 +173,7 @@ def userdel(username, permanent=False):
         qexec(["/bin/mv", home_dir, removed_dir])
     else:
         qexec(["/usr/sbin/userdel", "-r", username])
+    parse_passwd()
 
 
 def useradd(name, username, preferred_shell):
@@ -425,13 +426,17 @@ def remove_user(username, permanent=False):
     except: pass
 
 
-def process_users(good_users):
-    for username, user in good_users.iteritems():
-        if username not in current_usernames():
-            try:
-                useradd(user["name"], username, user["preferred_shell"])
-            except Exception, e:
-                print ("Unable to add user %s: %s" % (username, e))
+def process_users(defined_users):
+    for username, user in defined_users.iteritems():
+        if username not in current_userify_users():
+            if username in current_usernames():
+                print ("ERROR: username %s conflicts with an existing user on the system." % username)
+            else:
+                try:
+                    useradd(user["name"], username, user["preferred_shell"])
+                except Exception, e:
+                    print ("Unable to add user %s: %s" % (username, e))
+        if username in current_userify_users():
             if "ssh_public_key" in user:
                 try:
                     sshkey_add(username, user["ssh_public_key"])
@@ -441,11 +446,9 @@ def process_users(good_users):
                 sudoers_add(username, user["perm"])
             except Exception, e:
                 print ("Unable to configure sudo for user %s: %s" % (username, e))
-        else:
-            print ("ERROR: username %s conflicts with an existing user on the system." % username)
     for userrow in current_userify_users():
         username = userrow[0]
-        if username not in good_users.keys():
+        if username not in defined_users.keys():
             print ("[shim] removing" + username)
             try:
                 remove_user(username)

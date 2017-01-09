@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Userify Shim Installer
-# Copyright (c) 2011-2016 Userify Corporation
+# Copyright (c) 2017 Userify Corporation
 
 # How the shim works:
 #
@@ -140,7 +140,7 @@ cat << EOF > /opt/userify/uninstall.sh
 #
 # --------------------------------------------
 
-# Copyright (c) 2016 Userify Corp.
+# Copyright (c) 2017 Userify Corp.
 
 echo
 echo
@@ -260,7 +260,7 @@ cat << "EOF" > /opt/userify/shim.sh
 #
 # --------------------------------------------
 
-# Copyright (c) 2016 Userify Corp.
+# Copyright (c) 2017 Userify Corp.
 
 static_host="static.userify.com"
 source /opt/userify/userify_config.py

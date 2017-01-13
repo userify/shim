@@ -428,7 +428,10 @@ def process_users(defined_users):
 
         # if the user already exists on the system and we didn't create it, skip.
         if username in system_usernames() and username not in current_userify_users(usernames_only=True):
-            print ("ERROR: username %s conflicts with an existing user on the system." % username)
+            print ("ERROR: Ignoring username %s which conflicts with an " % username +
+                "existing non-Userify user on this system!\n" +
+                "To allow the shim to take over this user account, please run:\n" +
+                'sudo usermod -c "userify-%s" %s' % (username, username))
             continue
 
         # if the username doesn't exist, create it:

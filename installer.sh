@@ -63,7 +63,7 @@ fi
 
 
 cat << EOF
-   
+
              ${BLUE_TEXT}            _--_
              ${BLUE_TEXT}           (    \\
              ${BLUE_TEXT}        --/      )
@@ -82,6 +82,9 @@ ${PURPLE_TEXT}Tip: to understand how the shim works, read the source at
 ${CYAN_TEXT}https://github.com/userify/shim/
 ${RESET_TEXT}
 EOF
+
+# to get things reset in case you are cat'ing..
+export RESET_TEXT="[0m"
 
 # Check for root
 if [ "$(id -u)" != "0" ]; then

@@ -271,8 +271,8 @@ def failsafe_mkdir(path):
     except OSError: pass
 
 
-def auth(id,key):
-    return base64.b64encode(":".join((creds.api_id, creds.api_key)))
+def auth(api_id,api_key):
+    return base64.b64encode(":".join((api_id, api_key)))
 
 def instance_metadata(keys):
     # support instance metadata features
@@ -475,14 +475,12 @@ def main():
     if debug or failure:
         print ("%s %s" % (response.status, response.reason))
     configuration = {"error": "Unknown error parsing configuration"}
-    if failure:
-        return 30 + 60 * random.random()
     try:
         configuration = json.loads(text)
-        if debug or failure:
+        if debug:
             pprint(configuration)
         if failure and "error" in configuration:
-            print ("\n %s %s" % (response.reason.upper(), configuration["error"]))
+            print ("%s %s" % (response.reason.upper(), configuration["error"]))
     except Exception, e:
         failure = True
         print (line_spacer)
@@ -491,7 +489,7 @@ def main():
         pprint(text)
         print (line_spacer)
     if failure or "error" in configuration:
-        return 3
+        return 30 + 60 * random.random()
     process_users(configuration["users"])
     install_shim_runner()
 
@@ -531,7 +529,8 @@ if __name__ == "__main__":
             # traceback.print_exc()
             time_to_wait = 30 + 60 * random.random()
         elapsed = time.time() - s
-        print ("[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s")
+        if debug:
+            print ("[shim] elapsed: " + str(int(elapsed * 1000)/1000.0) + "s")
         if elapsed < time_to_wait:
             print ("[shim] sleeping: %ss" % int(time_to_wait-elapsed))
             time.sleep(time_to_wait-elapsed)

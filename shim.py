@@ -218,7 +218,8 @@ def sudoers_add(username, perm=""):
         if dry_run:
             print ("DRY RUN: Adding sudoers: %s %s" % (fname, text))
             return
-        if not os.path.isfile(fname) or open(fname).read() != text:
+        if not os.path.isfile(fname):
+            # or open(fname).read() != text:
             open(fname, "w").write(text)
             fullchmod("0440", fname)
     else:

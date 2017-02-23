@@ -26,7 +26,7 @@ import datetime
 import time
 import traceback
 import base64
-import urllib
+# import urllib
 from pprint import pprint
 import socket
 import platform

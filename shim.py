@@ -268,15 +268,20 @@ def fullchown(username, path):
 def fullchmod(mode, path):
     qexec(["chmod", "-R", mode, path])
 
+def fullchmod(mode, path):
+    qexec(["chmod", "-R", mode, path])
 
-def qexec(cmd):
-    print ("[shim] exec: \"" + " ".join(cmd) + '"')
+
+def qexec(cmd, quiet=False):
+    if not quiet:
+        print ("[shim] exec: \"" + " ".join(cmd) + '"')
     try:
-        subprocess.check_call(cmd)
+        return subprocess.check_call(cmd)
     except Exception, e:
-        print ("ERROR executing %s" % " ".join(cmd))
-        print (e)
-        print ("Retrying.. (shim.sh)")
+        if not quiet:
+            print ("ERROR executing %s" % " ".join(cmd))
+            print (e)
+            print ("Retrying.. (shim.sh)")
 
 
 def failsafe_mkdir(path):

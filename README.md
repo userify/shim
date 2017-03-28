@@ -25,7 +25,7 @@ and only requires:
 *  Linux 2.6 or later
 *  curl (command-line), sudo
 *  Python 2.6 or later (for httplib timeout, simplejson)
-*  HTTPS access to shim.userify.com (currently proxies are not supported)
+*  HTTPS access (currently proxies are not supported)
 
 These basics are *built-in* to most Linux distributions made in the last five years,
 including Red Hat, Debian, Ubuntu, RHEL, CentOS, OpenSUSE, Gentoo,

@@ -42,16 +42,16 @@ clear
 # Install Python on distributions that might be missing it.
 set +e
 
-if [ ! $(which python) ]; then
-    if [ $(which apt) ]; then
+if [ ! "$(command -v python)" ]; then
+    if [ "$(command -v apt)" ]; then
         echo "Installing Python with apt-get"
         sudo apt-get update >/dev/null
         sudo apt-get -qqy install python >/dev/null
         sudo apt-get -qqy install python-minimal >/dev/null
-    elif [ $(which yum) ]; then
+    elif [ "$(command -v yum)" ]; then
         echo "Installing Python with yum."
         sudo yum install -y python >/dev/null
-    elif [ $(which dnf) ]; then
+    elif [ "$(command -v dnf)" ]; then
         echo "Installing Python with dnf"
         sudo dnf install -y python
     else
@@ -245,7 +245,7 @@ else
     echo "${RED_TEXT}api_id variable not found, skipping creds.py creation."
     echo "This might be a bug unless you did this on purpose."
     echo "NOTE, Userify cannot work without creds.py. Please create it yourself."
-    echo ${RESET_TEXT}
+    echo "${RESET_TEXT}"
 fi
 
 
@@ -277,7 +277,7 @@ touch /var/log/userify-shim.log
 chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
-[ -z "$PYTHON" ] && PYTHON="$(which python)"
+[ -z "$PYTHON" ] && PYTHON="$(command -v python)"
 curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u 2>&1 >> /var/log/userify-shim.log
 
 if [ $? != 0 ]; then
@@ -317,11 +317,11 @@ elif [ -f /etc/init.d/after.local ]; then
 #     cat << EOF > /etc/systemd/system/userify-shim.service
 # [Unit]
 # Description=Userify Shim (userify.com)
-# 
+#
 # [Service]
 # Type=forking
 # ExecStart=/opt/userify/shim.sh
-# 
+#
 # [Install]
 # WantedBy=multi-user.target
 # EOF
@@ -388,16 +388,14 @@ echo "Please review shim output in /var/log/userify-shim.log"
 #     echo ${RED_TEXT}
 #     echo Unable to review userify-shim.log, please review it separately
 #     echo to ensure the shim is working properly.
-echo ${BLUE_TEXT}
+echo "${BLUE_TEXT}"
 echo cat /var/log/userify-shim.log
-echo ${RESET_TEXT}
+echo "${RESET_TEXT}"
 # else
 #     echo $OUTPUT
 # fi
-echo ${GREEN_TEXT}
+echo "${GREEN_TEXT}"
 echo "Thanks for using Userify!"
-echo ${RESET_TEXT}
+echo "${RESET_TEXT}"
 echo -------------------------------------------------------------
 echo
-
-

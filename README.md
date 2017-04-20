@@ -73,4 +73,28 @@ integrations or deployments, self-hosted installations, and professional
 consulting. Please open an issue with your question or contact support for
 assistance.
 
+Troubleshooting
+---------------
 
+#### I'm using a cloud-init.yml file but once my host is launched my userify users don't work
+
+This could be caused by any number of things, but if cloud-init runs into issues before reaching your `- curl ...`
+command then any number of things could happen.  Due to timing issues and the contents of your cloud-init.yml file
+this could happen all the time, or only very occasionally.
+
+1. Make sure you don't have multiple calls to installing the userify shim.
+2. If you have separate ssh access to the server:
+    First, make sure you're logging the cloud-init output somewhere:
+    ```yml
+    output:
+      all: '| tee -a /var/log/cloud-init-output.log'
+    ```
+    If you see something like the following in it:
+    ```
+    /opt/userify/shim.sh: line 26: -u: command not found
+    curl: (23) Failed writing body (0 != 16011)
+    ```
+    then the userify shim isn't able to find python.  As the shim also attempts to install python as part of the process,
+    the most common cause of this is from a timing issue with the package installer.  If you're able to, try uncommenting
+    the `packages` section of your cloud-init file and see if that solves the problem.
+3. Contact support or open an issue.

@@ -89,7 +89,8 @@ chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
-curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u 2>&1 >>/var/log/userify-shim.log
+curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u \
+    2>&1 >>/var/log/userify-shim.log
 
 if [ $? != 0 ]; then
     # extra backoff in event of failure,
@@ -483,6 +484,9 @@ def process_users(defined_users):
 def main():
     parse_passwd()
     h = https("POST", "/api/userify/configure")
+    if not h or not getattr(h, "sock"):
+        time.sleep(1)
+        return main()
     h.sock.settimeout(60)
     response = h.getresponse()
     text = response.read()

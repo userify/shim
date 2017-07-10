@@ -330,13 +330,21 @@ elif [ -f /etc/init.d/after.local ]; then
 else
     cat << EOF >&2
 ${RED_TEXT}
-Unable to set start at bootup -- no /etc/rc.local file?
-You'll have to set shim to startup on it's own: create an
-init script that launches /opt/userify/shim.sh on startup.
-In most distributions, this would have been a single line
-in /etc/rc.local, but you may need to do something more
-exotic. Please contact us with Linux version information
-and we may have more information for you.${RESET_TEXT}
+We tried to detect this Linux distro, but still unable to set start at bootup.
+You'll have to set shim to startup on its own: create an init script that
+launches /opt/userify/shim.sh on startup.  In most distributions, this would
+have been a single line in /etc/rc.local, but you may need to do something more
+exotic. Please contact us (support@userify.com) with Linux version information
+so we can get working on support.
+${RESET_TEXT}
+
+Here's some debug info, if available on your platform:
+
+$(cat /etc/os-release 2>/dev/null)
+$(lsb_release -a 2>/dev/null)
+$(uname -a 2>/dev/null)
+
+
 EOF
     exit 1
 fi

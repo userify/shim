@@ -257,10 +257,10 @@ def sudoers_add(username, perm=""):
         fullchmod("0440", fname)
 
 def sudoers_del(username):
-    if dry_run:
-        print ("DRY RUN: Deleting sudoers: %s %s" % (fname, text))
-        return
     fname = sanitize_sudoers_filename(username)
+    if dry_run:
+        print ("DRY RUN: Deleting sudoers: %s" % fname)
+        return
     if os.path.isfile(fname):
         qexec(["/bin/rm", fname])
 

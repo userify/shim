@@ -443,7 +443,7 @@ def parse_passwd():
     # username, unused, uid, gid, comment, homedir, shell
     app["passwd"] = [[i.strip() for i in l.split(":")]
         for l in open("/etc/passwd").read().strip().split("\n")]
-    app["passwd"] = [i if len(i)>6 else i.append("") for i in app["passwd"]]
+    app["passwd"] = [i if len(i)>6 else i.append("") for i in app["passwd"] if len(i)>4]
 
 
 def system_usernames():

@@ -2,7 +2,7 @@
 ### Open Source agent for the Userify EC2 SSH Key Manager
 #### Customizable deployment for enterprise datacenters and the cloud
 
-[Tour] (https://userify.com/tour/)  ·   [Sign Up] (https://dashboard.userify.com/#action=signup)
+[Tour](https://userify.com/tour/)  ·   [Sign Up](https://dashboard.userify.com/#action=signup)
 
 The Userify shim creates users, manages sudo permissions, etc based on
 the user accounts that you've configured in the Userify web console (https://console.userify.com)

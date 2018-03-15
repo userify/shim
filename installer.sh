@@ -159,6 +159,12 @@ fi
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/rc.local 2>/dev/null
 
+# New versions of Debian/deriv (9.0/16.04LTS) need this:
+set +e
+touch /etc/rc.local
+systemctl enable rc-local.service 2>/dev/null
+set -e
+
 # SUSE:
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/init.d/after.local 2>/dev/null

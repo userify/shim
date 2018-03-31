@@ -191,6 +191,7 @@ echo
 
 EOF
 
+chmod -R 700 /opt/userify/uninstall.sh
 
 
 if [ "x$api_id" != "x" ]; then
@@ -374,7 +375,6 @@ fi
 echo "${GREEN_TEXT}Setting Permissions${RESET_TEXT}"
 chmod -R 700 \
     /opt/userify/ \
-    /opt/userify/uninstall.sh \
     /opt/userify/shim.sh
 [ -f /var/log/userify-shim.log ] && rm /var/log/userify-shim.log
 touch /var/log/userify-shim.log

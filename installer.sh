@@ -159,12 +159,6 @@ fi
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/rc.local 2>/dev/null
 
-# New versions of Debian/deriv (9.0/16.04LTS) need this:
-set +e
-touch /etc/rc.local
-systemctl enable rc-local.service 2>/dev/null
-set -e
-
 # SUSE:
 sed -i "s/\/opt\/userify\/shim.sh \&//" \
     /etc/init.d/after.local 2>/dev/null
@@ -193,17 +187,24 @@ EOF
 
 chmod -R 700 /opt/userify/uninstall.sh
 
+# create empty creds.py
+echo -n > /opt/userify/creds.py
+chmod 0600 /opt/userify/creds.py
 
 if [ "x$api_id" != "x" ]; then
     echo "${GREEN_TEXT}Creating API login config (/opt/userify/creds.py)${RESET_TEXT}"
-    echo -n > /opt/userify/creds.py
-    chmod 0600 /opt/userify/creds.py
+else
+    echo "${RED_TEXT}api_id variable not found, skipping creds.py creation."
+    echo "This might be a bug unless you did this on purpose."
+    echo "NOTE, Userify cannot work without creds.py. Please create it yourself."
+    echo "${RESET_TEXT}"
+fi
 
 if [ -z "$shim_host" ]; then shim_host="shim.userify.com"; fi
 if [ -z "$self_signed" ]; then self_signed="0"; fi
 
-    # create creds configuration file
-    cat <<EOF >> /opt/userify/creds.py
+# create creds configuration file
+cat <<EOF >> /opt/userify/creds.py
 # Userify Credentials Configuration
 # This file should be owned and readable only by root.
 
@@ -225,7 +226,7 @@ EOF
 
 # Create new, optional userify_config.py file
 
-    cat <<EOF >> /opt/userify/userify_config.py
+cat <<EOF >> /opt/userify/userify_config.py
 # Userify Shim Configuration
 
 company="$company_name"
@@ -247,13 +248,6 @@ static_host="$static_host"
 self_signed=$self_signed
 
 EOF
-
-else
-    echo "${RED_TEXT}api_id variable not found, skipping creds.py creation."
-    echo "This might be a bug unless you did this on purpose."
-    echo "NOTE, Userify cannot work without creds.py. Please create it yourself."
-    echo "${RESET_TEXT}"
-fi
 
 
 # Create shim.sh script in /opt/userify
@@ -298,8 +292,25 @@ sleep 5
 
 # call myself. fork before exiting.
 /opt/userify/shim.sh &
-
 EOF
+
+
+# New versions of Debian/deriv (9.0/16.04LTS) need this:
+set +e
+echo 'here'
+if [ ! -f /etc/rc.local ]; then
+    cat << EOF > /etc/rc.local
+#!/bin/bash
+# rc.local
+EOF
+    if [ ! "$(command -v systemctl)" ]; then
+        systemctl daemon-reload
+        systemctl start rc-local
+        systemctl enable rc-local.service
+    fi
+fi
+echo 'here'
+set -e
 
 
 echo "${GREEN_TEXT}Removing exit 0 from rc.local (if there)${RESET_TEXT}"
@@ -347,9 +358,9 @@ ${RESET_TEXT}
 
 Here's some debug info, if available on your platform:
 
-$(cat /etc/os-release 2>/dev/null)
-$(lsb_release -a 2>/dev/null)
-$(uname -a 2>/dev/null)
+/etc/os-release: $(cat /etc/os-release 2>/dev/null)
+lsb_release -a: $(lsb_release -a 2>/dev/null)
+uname -a: $(uname -a 2>/dev/null)
 
 
 EOF
@@ -395,20 +406,9 @@ echo "${PURPLE_TEXT}Finished. Userify shim has been completely installed."
 echo "/opt/userify/uninstall.sh as root to uninstall."
 echo "debug=1 is enabled in /opt/userify/userify_config.py for extra verbosity."
 echo "Please review shim output in /var/log/userify-shim.log"
-# echo "(wait a few seconds..)"
-# echo ${BLUE_TEXT}
-# sleep 2
-# output=$(cat /var/log/userify-shim.log)
-# if [ "x$output" == "x" ]; then
-#     echo ${RED_TEXT}
-#     echo Unable to review userify-shim.log, please review it separately
-#     echo to ensure the shim is working properly.
 echo "${BLUE_TEXT}"
 echo cat /var/log/userify-shim.log
 echo "${RESET_TEXT}"
-# else
-#     echo $OUTPUT
-# fi
 echo "${GREEN_TEXT}"
 echo "Thanks for using Userify!"
 echo "${RESET_TEXT}"

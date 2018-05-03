@@ -298,7 +298,7 @@ EOF
 # New versions of Debian/deriv (9.0/16.04LTS) need this:
 set +e
 if [ ! -f /etc/rc.local ]; then
-    printf '#!/bin/bash#rc.local\n\n\nexit 0\n' |sudo tee /etc/rc.local
+    printf '#!/bin/bash\n#rc.local\n\n\n' |sudo tee /etc/rc.local
     chmod +x /etc/rc.local
     if [ ! "$(command -v systemctl)" ]; then
         systemctl daemon-reload

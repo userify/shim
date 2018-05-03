@@ -299,10 +299,8 @@ EOF
 set +e
 echo 'here'
 if [ ! -f /etc/rc.local ]; then
-    cat << EOF > /etc/rc.local
-#!/bin/bash
-# rc.local
-EOF
+    printf '#!/bin/bash#rc.local\n\n\nexit 0\n' |sudo tee /etc/rc.local
+    chmod +x /etc/rc.local
     if [ ! "$(command -v systemctl)" ]; then
         systemctl daemon-reload
         systemctl start rc-local

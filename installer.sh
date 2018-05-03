@@ -297,7 +297,6 @@ EOF
 
 # New versions of Debian/deriv (9.0/16.04LTS) need this:
 set +e
-echo 'here'
 if [ ! -f /etc/rc.local ]; then
     printf '#!/bin/bash#rc.local\n\n\nexit 0\n' |sudo tee /etc/rc.local
     chmod +x /etc/rc.local
@@ -307,7 +306,6 @@ if [ ! -f /etc/rc.local ]; then
         systemctl enable rc-local.service
     fi
 fi
-echo 'here'
 set -e
 
 

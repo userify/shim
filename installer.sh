@@ -42,7 +42,7 @@ clear
 # Install Python on distributions that might be missing it.
 set +e
 
-if [ ! "$(command -v python)" ]; then
+if [ ! "$(command -v python)" ] && [ ! "$(command -v python3)" ]; then
     if [ "$(command -v apt)" ]; then
         echo "Installing Python with apt-get"
         sudo apt-get update >/dev/null
@@ -279,6 +279,7 @@ chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(command -v python)"
+[ -z "$PYTHON" ] && PYTHON="$(command -v python3)"
 curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u \
     2>&1 >> /var/log/userify-shim.log
 

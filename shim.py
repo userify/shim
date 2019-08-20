@@ -557,7 +557,7 @@ def main():
         pprint(text)
         print (line_spacer)
     if failure or "error" in configuration:
-        return 30 + 60 * random.random()
+        return 180 + 60 * random.random()
     process_users(configuration["users"])
     install_shim_runner()
 
@@ -595,7 +595,7 @@ if __name__ == "__main__":
             print(("Error: %s" % e))
             print (line_spacer)
             # traceback.print_exc()
-            time_to_wait = 30 + 60 * random.random()
+            time_to_wait = 180 + 60 * random.random()
             raise
         elapsed = time.time() - s
         if debug:
@@ -607,7 +607,7 @@ if __name__ == "__main__":
         print (line_spacer)
         print(("Error: %s" % e))
         print (line_spacer)
-        t = 30 + 60 * random.random()
+        t = 180 + 60 * random.random()
         print(("[shim] sleeping: %ss" % int(t)))
         time.sleep(t)
         # display error to stdout

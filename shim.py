@@ -231,7 +231,27 @@ def useradd(name, username, preferred_shell):
     if dry_run:
         print(("DRY RUN: Adding user %s %s %s " % (name, username, preferred_shell)))
         return
-
+    
+    # figure out if preferred shell is available and fallback otherwise
+    bins = os.listdir("/bin/")
+    # this technically eliminates /sbin/nologin as an option, but in most distros it's available in /bin
+    pshell = preferred_shell.replace("/bin/","").replace("/sbin/","")
+    if pshell in ["nologin", "false", "true"]:
+        # if this is a nologin shell, default to /bin/false if preferred shell not available.
+        sh = [shell for shell in [pshell, "nologin", "false", "true"] if shell in bins]
+        if sh:
+            sh = sh[0]
+        else:
+            sh = "false"
+    else:
+        # if this is a regular login shell, default to /bin/bash if preferred shell not available.
+        sh = [shell for shell in [pshell,"bash","sh","zsh","ksh","csh"] if shell in bins]
+        if sh:
+            sh = sh[0]
+        else:
+            sh = "sh"
+    shell = "/bin/" + sh
+    
     # restore removed home directory
     if not os.path.isdir(home_dir) and os.path.isdir(removed_dir):
         qexec(["/bin/mv", removed_dir, home_dir])

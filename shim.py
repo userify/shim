@@ -262,7 +262,7 @@ def useradd(name, username, preferred_shell):
     cmd = ["/usr/sbin/useradd", useradd_suffix,
         # UsePAM no should be in /etc/ssh/sshd_config
         "--comment", "userify-" + name,
-        "-s", preferred_shell if preferred_shell else "/bin/bash",
+        "-s", shell,
         "--user-group", username]
     subprocess.call([i for i in cmd if i])
     fullchown(username, home_dir)

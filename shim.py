@@ -474,7 +474,8 @@ def https(method, path, data=""):
         "Accept": "text/plain, */json",
         "Authorization": auth(),
         "X-Local-IP": get_ip(),
-        "Accept-Encoding": "gzip, deflate"
+        # removed as doesn't work on python 3:
+        # "Accept-Encoding": "gzip, deflate"
     }
 
     data = data or {}

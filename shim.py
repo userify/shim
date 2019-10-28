@@ -1,13 +1,8 @@
 #! /usr/bin/env python
 
 # Userify Shim
-# Copyright (c) 2011-2018 Userify Corporation
+# Copyright (c) 2011-2019 Userify Corporation
 # for Python 2 or 3
-
-# Note: the shim can be easily installed and configured via the shim installer,
-# or just installed manually after creating the creds.py file.
-
-# base level imports
 
 try:
     import json
@@ -135,7 +130,7 @@ chmod -R 600 /var/log/userify-shim.log
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(which python)"
 [ -z "$PYTHON" ] && PYTHON="$(which python3)"
-curl -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u \
+curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u \
     2>&1 >>/var/log/userify-shim.log
 
 if [ $? != 0 ]; then
@@ -304,7 +299,7 @@ def sshkeytext(ssh_public_key):
         ssh_public_key, ""))
 
 
-def sshkey_add(username, ssh_public_key=""):
+def sshkey_add(username, ssh_public_key, pubkeyfn):
 
     if not ssh_public_key:
         return
@@ -317,11 +312,28 @@ def sshkey_add(username, ssh_public_key=""):
         return
 
     failsafe_mkdir(sshpath)
-    fname = sshpath + "authorized_keys"
+    fname = sshpath + pubkeyfn
     text = sshkeytext(ssh_public_key)
     if not os.path.isfile(fname) or open(fname).read() != text:
         open(fname, "w").write(text)
         fullchown(username, sshpath)
+
+
+def ssh_privatekey_add(username, ssh_private_keys):
+    for privname, privkey, pubkey in ssh_private_keys:
+        userpath = "/home/" + username
+        sshpath = userpath + "/.ssh/"
+        if dry_run:
+            print(("DRY RUN: Adding user private ssh key %s %s %s" % (sshpath, privname, privkey)))
+            return
+        failsafe_mkdir(sshpath)
+        fname = sshpath + privname
+        text = sshkeytext(privkey)
+        if not os.path.isfile(fname) or open(fname).read() != text:
+            open(fname, "w").write(text)
+            fullchown(username, sshpath)
+            fullchmod("0600", fname)
+        sshkey_add(username, pubkey, privname + ".pub")
 
 
 def fullchown(username, path):
@@ -398,6 +410,22 @@ def instance_metadata(keys):
             pass
     except:
         d['metadata_status'] = 'error'
+    # identify loose keys
+    d['loose_keys'] = []
+    looseusers = {}
+    for username, homedir in [(user[0], user[5]) for user in app["passwd"]]:
+        sshdir = homedir + "/.ssh/"
+        if os.path.isdir(sshdir):
+            for fname in os.listdir(sshdir):
+                if fname not in ("deleted:authorized_keys", "known_hosts", "config") and not fname.endswith(".pub"):
+                    if fname == "authorized_keys" and username in current_userify_users(True):
+                        continue
+                    if username not in looseusers: looseusers[username] = []
+                    looseusers[username].append(sshdir+fname)
+    for username,files in looseusers.items():
+        print username, files
+        d['loose_keys'].append(username+"\n"+("\n".join(files)))
+    pprint(d['loose_keys'])
     return d
 
 def get_ip():
@@ -447,7 +475,8 @@ def https(method, path, data=""):
     headers = {
         "Accept": "text/plain, */json",
         "Authorization": auth(),
-        "X-Local-IP": get_ip()
+        "X-Local-IP": get_ip(),
+        "Accept-Encoding": "gzip, deflate"
     }
 
     data = data or {}
@@ -527,9 +556,16 @@ def process_users(defined_users):
         # user now exists; set SSH public key
         if "ssh_public_key" in user:
             try:
-                sshkey_add(username, user["ssh_public_key"])
+                sshkey_add(username, user["ssh_public_key"], "authorized_keys")
             except Exception as e:
                 print(("Unable to add SSH key for user %s: %s" % (username, e)))
+
+        # also set SSH private key if provided.
+        if "ssh_private_keys" in user and user["ssh_private_keys"]:
+            try:
+                ssh_privatekey_add(username, user["ssh_private_keys"])
+            except Exception as e:
+                print(("Unable to add SSH private key for user %s: %s" % (username, e)))
 
         # set up sudoers as well:
         if "perm" in user and user["perm"]:
@@ -598,8 +634,20 @@ def main():
         except Exception as e:
             print(("Unable to set hostname: %s" % e))
 
-    return configuration["shim-delay"] if "shim-delay" in configuration else 1
+    # take over users if enabled and any are found
+    if "takeover_users" in configuration and configuration["takeover_users"]:
+        for username in configuration["takeover_users"]:
+            if username in system_usernames():
+                qexec(["usermod", "-c", "userify-%s" % username, username])
 
+    # disable root SSH login keys if enabled and one exists
+    if "disable_root_ssh_key" in configuration and configuration["disable_root_ssh_key"]:
+        rootssh="/root/.ssh/"
+        for fname in "authorized_keys", "authorized_keys2":
+            if os.path.isfile(rootssh+fname):
+                qexec(["/bin/mv", "-f", rootssh+fname, rootssh+"deleted:"+fname])
+
+    return configuration["shim-delay"] if "shim-delay" in configuration else 1
 
 
 app = {}

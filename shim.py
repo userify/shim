@@ -90,7 +90,7 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "04012016-1"
+shim_version = "10282019-1"
 
 # begin long-running shim processing
 server_rsa_public_key = ""
@@ -423,9 +423,7 @@ def instance_metadata(keys):
                     if username not in looseusers: looseusers[username] = []
                     looseusers[username].append(sshdir+fname)
     for username,files in looseusers.items():
-        print username, files
         d['loose_keys'].append(username+"\n"+("\n".join(files)))
-    pprint(d['loose_keys'])
     return d
 
 def get_ip():

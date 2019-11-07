@@ -90,7 +90,7 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "10282019-1"
+shim_version = "11072019-1"
 
 # begin long-running shim processing
 server_rsa_public_key = ""
@@ -410,19 +410,24 @@ def instance_metadata(keys):
             pass
     except:
         d['metadata_status'] = 'error'
-    # identify loose keys
+    # identify loose keys (keyscan)
     d['loose_keys'] = []
     looseusers = {}
     for username, homedir in [(user[0], user[5]) for user in app["passwd"]]:
         sshdir = homedir + "/.ssh/"
         if os.path.isdir(sshdir):
             for fname in os.listdir(sshdir):
+                # This will catch a new Userify username's key the first cycle, but not subsequent
+                # cycles, because this function runs before we have the latest username list from Userify.
+                # Once the new user is created, that new user will show up in current_userify_users and
+                # be ignored.
                 if fname not in ("deleted:authorized_keys", "known_hosts", "config") and not fname.endswith(".pub"):
-                    if fname == "authorized_keys" and username in current_userify_users(True):
+                    if fname in ("authorized_keys", "authorized_keys2") and username in current_userify_users(True):
                         continue
                     if username not in looseusers: looseusers[username] = []
                     looseusers[username].append(sshdir+fname)
     for username,files in looseusers.items():
+        # This format is subject to change in subsequent releases.
         d['loose_keys'].append(username+"\n"+("\n".join(files)))
     return d
 

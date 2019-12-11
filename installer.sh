@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Userify Shim Installer
-# Copyright (c) 2017 Userify Corporation
+# Copyright (c) 2019 Userify Corporation
 
 # How the shim works:
 #
@@ -264,7 +264,10 @@ cat << "EOF" > /opt/userify/shim.sh
 #
 # --------------------------------------------
 
-# Copyright (c) 2017 Userify Corp.
+# Copyright (c) 2019 Userify Corp.
+
+# wrap in an anonymous function
+{
 
 static_host="static.userify.com"
 source /opt/userify/userify_config.py
@@ -293,6 +296,9 @@ sleep 5
 
 # call myself. fork before exiting.
 /opt/userify/shim.sh &
+
+# send output to log file.
+} >> /var/log/userify-shim.log 2>&1
 EOF
 
 

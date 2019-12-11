@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Userify Shim
-# Copyright (c) 2011-2019 Userify Corporation
+# Copyright (c) 2019 Userify Corporation
 # for Python 2 or 3
 
 try:
@@ -113,7 +113,10 @@ def install_shim_runner():
 #
 # --------------------------------------------
 
-# Copyright (c) 2017 Userify Corp.
+# Copyright (c) 2019 Userify Corp.
+
+# wrap in an anonymous function
+{
 
 static_host="static.userify.com"
 touch /opt/userify/userify_config.py
@@ -143,6 +146,9 @@ sleep 5
 
 # call myself. fork before exiting.
 /opt/userify/shim.sh &
+
+# send output to log file.
+} >> /var/log/userify-shim.log 2>&1
 """.strip()
 
     try:

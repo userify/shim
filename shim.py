@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Userify Shim
-# Copyright (c) 2019 Userify Corporation
+# Copyright (c) 2015-2022 Userify Corporation
 # for Python 2 or 3
 
 try:
@@ -90,7 +90,7 @@ dry_run = getattr(config, "dry_run", False)
 shim_host = getattr(config, "shim_host", "configure.userify.com")
 debug = getattr(config, "debug", False)
 ec2md = ["instance-type", "hostname", "ami-id", "mac"]
-shim_version = "11072019-1"
+shim_version = "20220130-1"
 
 # begin long-running shim processing
 server_rsa_public_key = ""
@@ -113,7 +113,7 @@ def install_shim_runner():
 #
 # --------------------------------------------
 
-# Copyright (c) 2019 Userify Corp.
+# Copyright (c) 2015-2022 Userify Corp.
 
 # wrap in an anonymous function
 {
@@ -131,9 +131,9 @@ touch /var/log/userify-shim.log
 chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
-[ -z "$PYTHON" ] && PYTHON="$(which python)"
-[ -z "$PYTHON" ] && PYTHON="$(which python3)"
-curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u \
+[ -z "$PYTHON" ] && PYTHON="$(command -v python3)"
+[ -z "$PYTHON" ] && PYTHON="$(command -v python)"
+curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/static/shim.py | $PYTHON -u \
     2>&1 >>/var/log/userify-shim.log
 
 if [ $? != 0 ]; then

@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Userify Shim Installer
-# Copyright (c) 2019 Userify Corporation
+# Copyright (c) 2015-2022 Userify Corporation
 
 # How the shim works:
 #
@@ -143,7 +143,7 @@ cat << EOF > /opt/userify/uninstall.sh
 #
 # --------------------------------------------
 
-# Copyright (c) 2017 Userify Corp.
+# Copyright (c) 2015-2022 Userify Corp.
 
 echo
 echo
@@ -264,7 +264,7 @@ cat << "EOF" > /opt/userify/shim.sh
 #
 # --------------------------------------------
 
-# Copyright (c) 2019 Userify Corp.
+# Copyright (c) 2015-2022 Userify Corp.
 
 # wrap in an anonymous function
 {
@@ -281,9 +281,10 @@ touch /var/log/userify-shim.log
 chmod -R 600 /var/log/userify-shim.log
 
 # kick off shim.py
-[ -z "$PYTHON" ] && PYTHON="$(command -v python)"
 [ -z "$PYTHON" ] && PYTHON="$(command -v python3)"
-curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/shim.py | $PYTHON -u \
+[ -z "$PYTHON" ] && PYTHON="$(command -v python)"
+
+curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/shim/shim.py | $PYTHON -u \
     2>&1 >> /var/log/userify-shim.log
 
 if [ $? != 0 ]; then

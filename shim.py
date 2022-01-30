@@ -133,7 +133,7 @@ chmod -R 600 /var/log/userify-shim.log
 # kick off shim.py
 [ -z "$PYTHON" ] && PYTHON="$(command -v python3)"
 [ -z "$PYTHON" ] && PYTHON="$(command -v python)"
-curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/static/shim.py | $PYTHON -u \
+curl --compressed -1 -f${SELFSIGNED}Ss https://$static_host/shim/shim.py | $PYTHON -u \
     2>&1 >>/var/log/userify-shim.log
 
 if [ $? != 0 ]; then

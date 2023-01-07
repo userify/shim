@@ -50,7 +50,8 @@ if [ ! "$(command -v python)" ] && [ ! "$(command -v python3)" ]; then
         sudo apt-get -qqy install python-minimal >/dev/null
     elif [ "$(command -v yum)" ]; then
         echo "Installing Python with yum."
-        sudo yum install -y python >/dev/null
+        sudo yum install -y python >/dev/null || \
+            sudo yum install -y python3 >/dev/null
     elif [ "$(command -v dnf)" ]; then
         echo "Installing Python with dnf"
         sudo dnf install -y python

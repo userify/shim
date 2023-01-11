@@ -10,9 +10,9 @@ The shim is designed to be lightweight and easy to integrate and
 customize into Terraform, Ansible, Cloud Formation, Chef, Puppet, etc via
 the Userify dashboard, which automates the installation for you.
 
-The Userify shim is designed to have minimal working requirements (such as
-HTTPS, curl, any version of Python in the last 15 years, the Linux adduser
-command, and sudo.) These basics are *built-in* to most Linux distributions
+The Userify shim is designed to have minimal working requirements (curl,
+any version of Python since 2009, the Linux adduser command, and sudo.)
+These basics are built-in to most Linux distributions
 including Red Hat, Debian, Ubuntu, RHEL, CentOS, SLES, Gentoo, etc.
 
 What does the installer do?

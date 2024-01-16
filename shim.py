@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Userify Shim
-# Copyright (c) 2015-2022 Userify Corporation
+# Copyright (c) 2015-2024 Userify Corporation
 # for Python 2 or 3
 
 try:

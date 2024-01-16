@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # Userify Shim Installer
-# Copyright (c) 2015-2022 Userify Corporation
+# Copyright (c) 2015-2024 Userify Corporation
 
 # How the shim works:
 #

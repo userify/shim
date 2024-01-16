@@ -154,8 +154,8 @@ sleep 5
     try:
         # avoid disk writes when possible
         shim_runner = "/opt/userify/shim.sh"
-        md1 = hashlib.md5(new_shim.encode("utf-8")).digest()
-        md2 = hashlib.md5(open(shim_runner).read().encode("utf-8")).digest()
+        md1 = hashlib.sha256(new_shim.encode("utf-8")).digest()
+        md2 = hashlib.sha256(open(shim_runner).read().encode("utf-8")).digest()
         if md1 == md2:
             return
         fd, tmpname = tempfile.mkstemp(dir="/opt/userify/")

@@ -1,4 +1,5 @@
 # Userify Shim <a href=https://userify.com/><img src="https://userify.com/media/userify-logo_2016-charcoal-purple-no-tagline-no-cloud.svg" align="right"></a>
+
 ### Userify SSH Key Manager
 
 The Userify shim creates users, manages sudo permissions, etc based on
@@ -7,13 +8,17 @@ or through the API. It wakes up once every ten seconds or so,
 checks for things to do, and goes back to sleep.
 
 The shim is designed to be lightweight and easy to integrate and
-customize into Terraform, Ansible, Cloud Formation, Chef, Puppet, etc via
+customize into Terraform, Ansible, Cloud Formation, Chef, Puppet,
+bash, and CloudInit via
 the Userify dashboard, which automates the installation for you.
 
-The Userify shim is designed to have minimal working requirements (curl,
-any version of Python since 2009, the Linux adduser command, and sudo.)
+The Userify shim is designed to have minimal working requirements
+(curl, any version of Python, the Linux useradd command, and sudo.)
 These basics are built-in to most Linux distributions
-including Red Hat, Debian, Ubuntu, RHEL, CentOS, SLES, Gentoo, etc.
+including Debian, Alma, Rocky, Ubuntu, RHEL, CentOS, SLES, Devuan,
+Gentoo, etc. (Linux distributions that use BusyBox, such as Alpine,
+are not currently supported, but if you have this as a requirement
+please get in touch.)
 
 What does the installer do?
 ---------------------------

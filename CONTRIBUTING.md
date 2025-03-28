@@ -3,7 +3,7 @@ Contributing to Userify
 
 Thank you for your pull request -- it's welcome and highly appreciated!
 
-The entirety of Userify is Copyright (c) Userify Corporation.
+The entirety of Userify is Copyright (c) 2011-2025 Userify Corporation.
 
 By submitting a pull request or making any other contribution, you
 indicate that you have read and agree to the contributor agreement shown

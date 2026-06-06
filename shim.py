@@ -387,21 +387,20 @@ def _same_regular_file(path, text, mode=None):
 
 def _drop_to_user(username):
     pw = pwd.getpwnam(username)
-    # Clear/rebuild supplementary groups before dropping uid/gid. Refuse to
-    # continue if we cannot do this; keeping root's supplementary groups would
-    # defeat the purpose of writing user-controlled SSH files as the user.
+    # Clear inherited supplementary groups first. initgroups() is best-effort;
+    # continuing with only the primary group is safer than retaining root's groups.
+    if hasattr(os, "setgroups"):
+        os.setgroups([])
+    elif not hasattr(os, "initgroups"):
+        raise Exception("unable to clear supplementary groups")
     if hasattr(os, "initgroups"):
         try:
             os.initgroups(username, pw.pw_gid)
-        except Exception:
-            if hasattr(os, "setgroups"):
-                os.setgroups([pw.pw_gid])
-            else:
+        except Exception as e:
+            if not hasattr(os, "setgroups"):
                 raise
-    elif hasattr(os, "setgroups"):
-        os.setgroups([pw.pw_gid])
-    else:
-        raise Exception("unable to clear supplementary groups")
+            print(("Unable to initialize groups for %s: %s; "
+                   "continuing with primary group only" % (username, e)))
     os.setgid(pw.pw_gid)
     os.setuid(pw.pw_uid)
     if os.geteuid() == 0:

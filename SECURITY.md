@@ -1,5 +1,9 @@
 # Security Policy
 
+## AI
+
+Due to an overwhelming number of agentic reports, we cannot accept agentic written vulnerabilities.
+
 ## Support
 
 Userify supports and automatically distributes the latest shim version. Please test only with the latest shim version.
